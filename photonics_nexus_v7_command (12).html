@@ -1612,22 +1612,24 @@
         /* SPRINT 9: PRODUCT SELECTOR MODAL                                     */
         /* ═══════════════════════════════════════════════════════════════════ */
         
+        /* SPRINT 43: Native <dialog> — overlay handled by ::backdrop */
         .product-selector-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+            border: none;
+            background: transparent;
+            padding: 0;
+            max-width: none;
+            max-height: none;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
+            overflow: visible;
         }
-        
-        .product-selector-overlay.visible {
-            display: flex;
+
+        .product-selector-overlay::backdrop {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
         }
         
         .product-selector-modal {
@@ -3906,22 +3908,24 @@
         /* Compact modal showing only compatible replacement products          */
         /* ═══════════════════════════════════════════════════════════════════ */
         
+        /* SPRINT 43: Native <dialog> — overlay via ::backdrop */
         .rec-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+            border: none;
+            background: transparent;
+            padding: 0;
+            max-width: none;
+            max-height: none;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 20000;
+            overflow: visible;
         }
-        
-        .rec-modal-overlay.visible {
-            display: flex;
+
+        .rec-modal-overlay::backdrop {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
         }
         
         .rec-modal {
@@ -7326,7 +7330,8 @@
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <!-- SPRINT 9: PRODUCT SELECTOR MODAL                                    -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <div class="product-selector-overlay" id="product-selector-overlay">
+    <!-- SPRINT 43: Migrated to native <dialog> for built-in a11y & focus trap -->
+    <dialog class="product-selector-overlay" id="product-selector-overlay">
         <div class="product-selector-modal">
             <div class="product-selector-header">
                 <div class="product-selector-title">
@@ -7343,10 +7348,10 @@
                 <!-- Product SKU cards will be dynamically inserted here -->
             </div>
         </div>
-    </div>
+    </dialog>
     
-    <!-- SPRINT 23.2: Recommendation Selector Modal -->
-    <div class="rec-modal-overlay" id="rec-modal-overlay">
+    <!-- SPRINT 23.2/43: Recommendation Selector — migrated to native <dialog> -->
+    <dialog class="rec-modal-overlay" id="rec-modal-overlay">
         <div class="rec-modal">
             <div class="rec-modal-header">
                 <div class="header-icon">💡</div>
@@ -7366,7 +7371,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </dialog>
     
     <!-- SPRINT 23.2: Confirm Replace Dialog -->
     <div class="rec-confirm-overlay" id="rec-confirm-overlay">
@@ -11227,7 +11232,14 @@
                 document.getElementById('rec-modal-close')?.addEventListener('click', () => {
                     this.hideRecommendationModal();
                 });
-                
+
+                // SPRINT 43: <dialog> ESC support via cancel event
+                this.recModalOverlay.addEventListener('cancel', (e) => {
+                    e.preventDefault();
+                    this.hideRecommendationModal();
+                });
+
+                // Backdrop click
                 this.recModalOverlay.addEventListener('click', (e) => {
                     if (e.target === this.recModalOverlay) {
                         this.hideRecommendationModal();
@@ -11543,25 +11555,26 @@
                     });
                 }
                 
-                // Show modal
+                // SPRINT 43: Show via native <dialog> API
                 if (this.recModalOverlay) {
-                    this.recModalOverlay.classList.add('visible');
+                    this.recModalOverlay.showModal();
                 }
             }
-            
+
             /**
              * Legacy method - redirect to new showRecommendations
              */
             highlightProductsInLibrary(filterCriteria) {
                 this.showRecommendations(filterCriteria);
             }
-            
+
             /**
              * Hide recommendation modal
              */
             hideRecommendationModal() {
+                // SPRINT 43: Close via native <dialog> API
                 if (this.recModalOverlay) {
-                    this.recModalOverlay.classList.remove('visible');
+                    this.recModalOverlay.close();
                 }
             }
             
@@ -15844,6 +15857,9 @@
                 this.currentAnchor = null;
                 this.tempLine = null;
                 this.selectedAnnotation = null;
+                // SPRINT 43: Reuse single Raycaster instance across handlePress/Drag/Release
+                this._raycaster = new THREE.Raycaster();
+                this._mouseVec = new THREE.Vector2();
                 
                 // DOM elements
                 this.modeIndicator = document.getElementById('annotation-mode-indicator');
@@ -15915,19 +15931,18 @@
                 if (!this.isActive) return false;
                 
                 const rect = this.sceneManager.container.getBoundingClientRect();
-                const mouse = new THREE.Vector2(
+                this._mouseVec.set(
                     ((event.clientX - rect.left) / rect.width) * 2 - 1,
                     -((event.clientY - rect.top) / rect.height) * 2 + 1
                 );
-                
-                // Raycast to find intersection point
-                const raycaster = new THREE.Raycaster();
-                raycaster.setFromCamera(mouse, this.sceneManager.camera);
-                
+
+                // SPRINT 43: Reuse shared raycaster
+                this._raycaster.setFromCamera(this._mouseVec, this.sceneManager.camera);
+
                 // Check for component hit first
                 const selectableMeshes = this.sceneManager.getSelectableMeshes();
-                let intersects = raycaster.intersectObjects(selectableMeshes, true);
-                
+                let intersects = this._raycaster.intersectObjects(selectableMeshes, true);
+
                 let anchorPoint;
                 let attachedTo = null;
                 
@@ -15975,18 +15990,17 @@
                 if (!this.isActive || !this.currentAnchor || !this.tempLine) return false;
                 
                 const rect = this.sceneManager.container.getBoundingClientRect();
-                const mouse = new THREE.Vector2(
+                this._mouseVec.set(
                     ((event.clientX - rect.left) / rect.width) * 2 - 1,
                     -((event.clientY - rect.top) / rect.height) * 2 + 1
                 );
-                
-                // Project to a plane slightly above the anchor
-                const raycaster = new THREE.Raycaster();
-                raycaster.setFromCamera(mouse, this.sceneManager.camera);
-                
+
+                // SPRINT 43: Reuse shared raycaster
+                this._raycaster.setFromCamera(this._mouseVec, this.sceneManager.camera);
+
                 const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -this.currentAnchor.point.y - 0.02);
                 const endPoint = new THREE.Vector3();
-                raycaster.ray.intersectPlane(plane, endPoint);
+                this._raycaster.ray.intersectPlane(plane, endPoint);
                 
                 if (endPoint) {
                     // Update temp line
@@ -16008,17 +16022,17 @@
                 
                 // Get the final label position
                 const rect = this.sceneManager.container.getBoundingClientRect();
-                const mouse = new THREE.Vector2(
+                this._mouseVec.set(
                     ((event.clientX - rect.left) / rect.width) * 2 - 1,
                     -((event.clientY - rect.top) / rect.height) * 2 + 1
                 );
-                
-                const raycaster = new THREE.Raycaster();
-                raycaster.setFromCamera(mouse, this.sceneManager.camera);
-                
+
+                // SPRINT 43: Reuse shared raycaster
+                this._raycaster.setFromCamera(this._mouseVec, this.sceneManager.camera);
+
                 const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -this.currentAnchor.point.y - 0.02);
                 const labelPoint = new THREE.Vector3();
-                raycaster.ray.intersectPlane(plane, labelPoint);
+                this._raycaster.ray.intersectPlane(plane, labelPoint);
                 
                 if (labelPoint) {
                     this.currentAnchor.labelPoint = labelPoint;
@@ -19137,30 +19151,32 @@
         }
         
         // ═══════════════════════════════════════════════════════════════════
-        // SPRINT 31: Global FROG test function
+        // SPRINT 31/43: FROG debug helpers — gated behind #debug hash
         // ═══════════════════════════════════════════════════════════════════
-        window.testFROG = function(laserPulseWidth = 50, gdd = 2000, tod = 0) {
-            console.log('═══════════════════════════════════════════════════');
-            console.log('🔬 TESTING FROG PULSE COMPARISON (Fourier-based)');
-            console.log('═══════════════════════════════════════════════════');
-            console.log(`   λ = 800 nm`);
-            console.log(`   τ_laser = ${laserPulseWidth} fs`);
-            console.log(`   GDD = ${gdd} fs², TOD = ${tod} fs³`);
-            console.log('');
-            
-            if (window.frogComparison) {
-                window.frogComparison.calculateAndDisplay(800, laserPulseWidth, gdd, 'Test Laser', tod);
-                console.log('✅ Test complete - check FROG panel');
-            } else {
-                console.error('❌ window.frogComparison not initialized');
-            }
-        };
-        
-        window.showFROGPanel = function() {
-            if (window.frogComparison) {
-                window.frogComparison.show();
-            }
-        };
+        if (location.hash === '#debug') {
+            window.testFROG = function(laserPulseWidth = 50, gdd = 2000, tod = 0) {
+                console.log('═══════════════════════════════════════════════════');
+                console.log('🔬 TESTING FROG PULSE COMPARISON (Fourier-based)');
+                console.log('═══════════════════════════════════════════════════');
+                console.log(`   λ = 800 nm`);
+                console.log(`   τ_laser = ${laserPulseWidth} fs`);
+                console.log(`   GDD = ${gdd} fs², TOD = ${tod} fs³`);
+                console.log('');
+
+                if (window.frogComparison) {
+                    window.frogComparison.calculateAndDisplay(800, laserPulseWidth, gdd, 'Test Laser', tod);
+                    console.log('✅ Test complete - check FROG panel');
+                } else {
+                    console.error('❌ window.frogComparison not initialized');
+                }
+            };
+
+            window.showFROGPanel = function() {
+                if (window.frogComparison) {
+                    window.frogComparison.show();
+                }
+            };
+        } // end #debug gate
 
         // ═══════════════════════════════════════════════════════════════════
         // SPRINT 33: DISPERSION OPTIMIZER (Business Recommender Engine)
@@ -19432,28 +19448,30 @@
         let dispersionOptimizer = null;
 
         // ═══════════════════════════════════════════════════════════════════
-        // SPRINT 16 DEBUG: Global function to manually show pulse panel
+        // SPRINT 16/43 DEBUG: Show pulse panel — gated behind #debug hash
         // ═══════════════════════════════════════════════════════════════════
-        window.showPulsePanel = function() {
-            const panel = document.getElementById('pulse-analyzer-panel');
-            if (panel) {
-                panel.style.display = 'block';
-                console.log('✅ Panel manually shown');
-                
-                // Update with current data if available
-                if (window.pulseAnalyzer) {
-                    console.log('Current PulseAnalyzer state:', {
-                        mode: window.pulseAnalyzer.mode,
-                        inputPulseWidth: window.pulseAnalyzer.inputPulseWidth,
-                        measuredWidth: window.pulseAnalyzer.measuredWidth,
-                        totalGDD: window.pulseAnalyzer.totalGDD
-                    });
-                    window.pulseAnalyzer.updateDisplay();
+        if (location.hash === '#debug') {
+            window.showPulsePanel = function() {
+                const panel = document.getElementById('pulse-analyzer-panel');
+                if (panel) {
+                    panel.style.display = 'block';
+                    console.log('✅ Panel manually shown');
+
+                    // Update with current data if available
+                    if (window.pulseAnalyzer) {
+                        console.log('Current PulseAnalyzer state:', {
+                            mode: window.pulseAnalyzer.mode,
+                            inputPulseWidth: window.pulseAnalyzer.inputPulseWidth,
+                            measuredWidth: window.pulseAnalyzer.measuredWidth,
+                            totalGDD: window.pulseAnalyzer.totalGDD
+                        });
+                        window.pulseAnalyzer.updateDisplay();
+                    }
+                } else {
+                    console.error('❌ pulse-analyzer-panel not found in DOM');
                 }
-            } else {
-                console.error('❌ pulse-analyzer-panel not found in DOM');
-            }
-        };
+            };
+        } // end #debug gate
 
         // ═══════════════════════════════════════════════════════════════════
         // SPRINT 26: TRANSACTION-BASED HISTORY MANAGER
@@ -22454,9 +22472,82 @@
 
         // ═══════════════════════════════════════════════════════════════════
         // BEAM SYSTEM - Ray Tracing with Reflection & Beam Splitting
+        // ═══════════════════════════════════════════════════════════════════
+        // SPRINT 43: Spatial Hash Grid for O(1) ray-component intersection
+        // All optical components live on the Y=beamHeight XZ plane, so we
+        // only need a 2D grid indexed by (cellX, cellZ).
+        // ═══════════════════════════════════════════════════════════════════
+
+        class SpatialHashGrid {
+            /**
+             * @param {number} cellSize — world-space size of each cell (meters)
+             */
+            constructor(cellSize = 0.1) {
+                this.cellSize = cellSize;
+                this.cells = new Map();
+            }
+
+            /** Hash a world-space XZ position to a cell key */
+            _key(x, z) {
+                const cx = Math.floor(x / this.cellSize);
+                const cz = Math.floor(z / this.cellSize);
+                return `${cx},${cz}`;
+            }
+
+            /** Clear the grid and re-insert all components */
+            rebuild(components) {
+                this.cells.clear();
+                for (const comp of components) {
+                    const wp = new THREE.Vector3();
+                    comp.getWorldPosition(wp);
+                    const key = this._key(wp.x, wp.z);
+                    if (!this.cells.has(key)) this.cells.set(key, []);
+                    this.cells.get(key).push(comp);
+                }
+            }
+
+            /**
+             * Query components near a ray segment (origin → origin + dir * maxDist).
+             * Returns a deduplicated set of components whose cells the ray passes through.
+             * Uses a simple DDA (Digital Differential Analyzer) 2D grid traversal.
+             */
+            queryRay(originX, originZ, dirX, dirZ, maxDist) {
+                const result = new Set();
+                const cs = this.cellSize;
+                const steps = Math.ceil(maxDist / cs) + 1;
+                const stepLen = maxDist / Math.max(steps, 1);
+
+                // Walk along the ray, sampling cells
+                for (let i = 0; i <= steps; i++) {
+                    const t = i * stepLen;
+                    const sx = originX + dirX * t;
+                    const sz = originZ + dirZ * t;
+                    const key = this._key(sx, sz);
+                    const cell = this.cells.get(key);
+                    if (cell) {
+                        for (const c of cell) result.add(c);
+                    }
+                    // Also check neighbor cells (components may straddle boundaries)
+                    const cx = Math.floor(sx / cs);
+                    const cz = Math.floor(sz / cs);
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dz = -1; dz <= 1; dz++) {
+                            if (dx === 0 && dz === 0) continue;
+                            const nk = `${cx + dx},${cz + dz}`;
+                            const nc = this.cells.get(nk);
+                            if (nc) {
+                                for (const c of nc) result.add(c);
+                            }
+                        }
+                    }
+                }
+                return Array.from(result);
+            }
+        }
+
         // SPRINT 34: Enhanced 3D Volumetric Beam Rendering with InstancedMesh
         // ═══════════════════════════════════════════════════════════════════
-        
+
         class BeamSystem {
             constructor(scene) {
                 this.scene = scene;
@@ -23785,20 +23876,25 @@
             findIntersection(origin, direction, components) {
                 let closestHit = null;
                 let closestDistance = Infinity;
-                
-                for (const component of components) {
+
+                // SPRINT 43: Use spatial grid when available to narrow candidates
+                const candidates = this._spatialGrid
+                    ? this._spatialGrid.queryRay(origin.x, origin.z, direction.x, direction.z, 2.0)
+                    : components;
+
+                for (const component of candidates) {
                     const productData = PRODUCT_SCHEMA[component.userData.productId];
                     if (!productData) continue;
                     if (productData.type === 'SOURCE') continue;
-                    
+
                     const hit = this.intersectComponent(origin, direction, component, productData);
-                    
+
                     if (hit && hit.distance > 0.001 && hit.distance < closestDistance) {
                         closestDistance = hit.distance;
                         closestHit = hit;
                     }
                 }
-                
+
                 return closestHit;
             }
 
@@ -24148,6 +24244,48 @@
         // SCENE MANAGER
         // ═══════════════════════════════════════════════════════════════════
         
+        // ═══════════════════════════════════════════════════════════════════
+        // SPRINT 43: SceneManager Decomposition Blueprint (P3-01)
+        //
+        // Current state: 111 methods, ~7,000 lines — "God class"
+        //
+        // Phase 1 — Extract SelectionManager (14 methods, ~500 lines)
+        //   selectObject, deselectObject, add/removeFromMultiSelection,
+        //   clearMultiSelection, updateMultiSelectUI, boxSelection suite,
+        //   selectAll, copySelected, pasteClipboard
+        //   Depends on: TransformControl, UI panels (loose coupling OK)
+        //
+        // Phase 2 — Extract DragSystem (35 methods, ~2,400 lines) ← HIGHEST PRIORITY
+        //   setupInteraction, _processDragFrame, clampToBounds,
+        //   isOutOfBounds, nudgeSelected, align/distribute, snap,
+        //   _showBoundaryIndicator, _flashObjectRed
+        //   Depends on: SelectionManager, BeamSystem, SpatialGrid
+        //
+        // Phase 3 — Extract EntityLifecycleManager (13 methods, ~900 lines)
+        //   addComponent, _createComponent, _addToScene, _removeFromScene,
+        //   deleteSelected, duplicateSelected, replaceSelected, findSafeSpawn
+        //   Depends on: ProductRepository, ModelFactory, HistoryManager
+        //
+        // Phase 4 — Extract MeasurementHubManager (5 methods, ~700 lines)
+        //   updateMeasurementHub, updatePulseMeasurementCard, autoAlignPM,
+        //   autoAlignAnalyzer, setAnalyzerSnapHighlight
+        //   Depends on: entities, PhysicsEngine payloads
+        //
+        // Phase 5 — Extract ViewportManager (9 methods, ~400 lines)
+        //   setupCamera, setupRenderer, setupPostProcessing, setupControls,
+        //   fitCameraToTable, zoomIn/Out/ToFit, resetView, setView,
+        //   animate, onResize
+        //   Depends on: Three.js scene, camera, renderer
+        //
+        // Coupling reduction strategy:
+        //   1. EventBus for cross-manager communication (replaces direct calls)
+        //   2. Each extracted manager receives SceneManager ref for legacy bridge
+        //   3. Migrate call-sites incrementally (facade pattern on SceneManager)
+        //   4. Keep single-file constraint — classes stay in same HTML file
+        //
+        // Estimated effort: ~40 developer-hours across 5 phases
+        // ═══════════════════════════════════════════════════════════════════
+
         class SceneManager {
             constructor(containerElement) {
                 this.container = containerElement;
@@ -24168,6 +24306,9 @@
                 this.isDirectDragging = false;
                 this.directDragObject = null;
                 this.currentSnapTarget = null;
+
+                // SPRINT 43: Spatial hash grid for fast ray-component queries
+                this._spatialGrid = new SpatialHashGrid(0.1);
                 
                 // ═══════════════════════════════════════════════════════════
                 // SPRINT 16: CRITICAL HOTFIX - Throttling & Loop Prevention
@@ -29164,6 +29305,10 @@
                         return p && p.type !== 'SOURCE';
                     });
 
+                    // SPRINT 43: Rebuild spatial hash grid for this frame
+                    this._spatialGrid.rebuild(opticalComponents);
+                    this.beamSystem._spatialGrid = this._spatialGrid;
+
                     // Reset all power meters before tracing
                     this.beamSystem.resetPowerMeters(opticalComponents);
                     
@@ -30863,12 +31008,14 @@
                 requestAnimationFrame(() => this.animate());
                 this.controls.update();
                 this.composer.render();
-                
-                // SPRINT 13: Update annotation screen positions
-                if (window.annotationManager) {
+
+                // SPRINT 43: Throttle annotation updates to every 3rd frame (~20 fps)
+                // DOM projection is expensive; annotations don't need 60 fps sync
+                this._animFrameCount = (this._animFrameCount || 0) + 1;
+                if (this._animFrameCount % 3 === 0 && window.annotationManager) {
                     window.annotationManager.updateAllAnnotations();
                 }
-                
+
                 // SPRINT 24.2: Dashboard is screen-fixed, no position updates needed
             }
 
@@ -32194,6 +32341,8 @@
                 this.baseSpeed = 0.001; // Base speed in meters per frame at 60fps
                 this.lastTime = 0;
                 this.resultLabels = [];
+                // SPRINT 43: Reuse raycaster for collision checks
+                this._collisionRaycaster = new THREE.Raycaster();
                 
                 this.panel = document.getElementById('pulse-animator-panel');
                 this.playBtn = document.getElementById('btn-pulse-play');
@@ -32630,12 +32779,11 @@
             }
             
             checkCollision(pulse, stepDistance) {
-                const raycaster = new THREE.Raycaster(
-                    pulse.position.clone(),
-                    pulse.direction.clone(),
-                    0,
-                    stepDistance * 2
-                );
+                // SPRINT 43: Reuse shared raycaster — set origin/direction/near/far
+                const raycaster = this._collisionRaycaster;
+                raycaster.set(pulse.position.clone(), pulse.direction.clone());
+                raycaster.near = 0;
+                raycaster.far = stepDistance * 2;
                 
                 // Get optical components
                 const components = this.sceneManager._getAllOpticalComponents();
@@ -32853,22 +33001,21 @@
                 
                 // Bind events
                 this.closeBtn.addEventListener('click', () => this.hide());
+                // SPRINT 43: <dialog> supports ESC natively (fires 'cancel' event)
+                this.overlay.addEventListener('cancel', (e) => {
+                    e.preventDefault(); // prevent default close to use our hide() cleanup
+                    this.hide();
+                });
+                // Backdrop click: clicks on <dialog> itself (not children) = backdrop
                 this.overlay.addEventListener('click', (e) => {
                     if (e.target === this.overlay) this.hide();
                 });
-                
-                // ESC to close
-                window.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.isVisible()) {
-                        this.hide();
-                    }
-                });
-                
+
                 console.log('🏪 ProductSelectorModal initialized');
             }
-            
+
             isVisible() {
-                return this.overlay.classList.contains('visible');
+                return this.overlay.open;
             }
             
             show(category, callback, mode = 'add') {
@@ -32914,12 +33061,13 @@
                     });
                 });
                 
-                // Show modal
-                this.overlay.classList.add('visible');
+                // SPRINT 43: Show via native <dialog> API
+                this.overlay.showModal();
             }
-            
+
             hide() {
-                this.overlay.classList.remove('visible');
+                // SPRINT 43: Close via native <dialog> API
+                this.overlay.close();
                 this.currentCategory = null;
                 this.onProductSelected = null;
             }
@@ -33529,48 +33677,72 @@
                     </div>`;
                 return; // Stop further initialization — all managers depend on sceneManager
             }
-            window.sceneManager = sceneManager;
+            // ═══════════════════════════════════════════════════════════════
+            // SPRINT 43: Consolidate globals into window.PhotonicsNexus namespace
+            // All managers accessible via PhotonicsNexus.xxx; legacy window.xxx
+            // aliases kept for backward compatibility with existing console usage.
+            // ═══════════════════════════════════════════════════════════════
+            const PN = window.PhotonicsNexus = {};
+
+            PN.sceneManager = sceneManager;
+            window.sceneManager = sceneManager; // legacy alias
             sceneManager.updateTheme(themeManager.currentTheme);
-            
+
             // SPRINT 22: Initialize Validator Feedback System
             validatorFeedback = new ValidatorFeedback(sceneManager);
-            window.validatorFeedback = validatorFeedback;
-            
+            PN.validatorFeedback = validatorFeedback;
+            window.validatorFeedback = validatorFeedback; // legacy alias
+
             toolbarManager = new ToolbarManager();
-            
+            PN.toolbarManager = toolbarManager;
+
             // SPRINT 8: Initialize Measurement Tool
             measurementTool = new MeasurementTool(sceneManager);
-            
+            PN.measurementTool = measurementTool;
+
             // SPRINT 8.5: Initialize Optical Path Tool
             opticalPathTool = new OpticalPathTool(sceneManager);
-            
+            PN.opticalPathTool = opticalPathTool;
+
             // SPRINT 11.5: Initialize Group Manager
             groupManager = new GroupManager(sceneManager);
-            window.groupManager = groupManager;  // Expose for selectObject
-            
+            PN.groupManager = groupManager;
+            window.groupManager = groupManager; // legacy alias — used by selectObject
+
             // SPRINT 13: Initialize Annotation Manager
             annotationManager = new AnnotationManager(sceneManager);
-            window.annotationManager = annotationManager;
-            
+            PN.annotationManager = annotationManager;
+            window.annotationManager = annotationManager; // legacy alias
+
             // SPRINT 13: Initialize Format Painter
             formatPainter = new FormatPainter(sceneManager);
-            window.formatPainter = formatPainter;
-            
+            PN.formatPainter = formatPainter;
+            window.formatPainter = formatPainter; // legacy alias
+
             // SPRINT 39: Initialize Quick Panel (Floating Parameter Card)
-            window.quickPanel = new QuickPanel(sceneManager);
-            
+            const quickPanel = new QuickPanel(sceneManager);
+            PN.quickPanel = quickPanel;
+            window.quickPanel = quickPanel; // legacy alias
+
             // SPRINT 15: Initialize Pulse Analyzer
             pulseAnalyzer = new PulseAnalyzer(sceneManager);
-            window.pulseAnalyzer = pulseAnalyzer;
-            
+            PN.pulseAnalyzer = pulseAnalyzer;
+            window.pulseAnalyzer = pulseAnalyzer; // legacy alias
+
             // SPRINT 30: Initialize Light Pulse Animator
-            window.pulseAnimator = new LightPulseAnimator(sceneManager);
-            
+            const pulseAnimator = new LightPulseAnimator(sceneManager);
+            PN.pulseAnimator = pulseAnimator;
+            window.pulseAnimator = pulseAnimator; // legacy alias
+
             // SPRINT 31: Initialize FROG Pulse Comparison
-            window.frogComparison = new FROGPulseComparison(sceneManager);
-            
+            const frogComparison = new FROGPulseComparison(sceneManager);
+            PN.frogComparison = frogComparison;
+            window.frogComparison = frogComparison; // legacy alias
+
             // SPRINT 33: Initialize Dispersion Optimizer (Business Recommender)
-            window.dispersionOptimizer = new DispersionOptimizer(productRepository.data);
+            dispersionOptimizer = new DispersionOptimizer(productRepository.data);
+            PN.dispersionOptimizer = dispersionOptimizer;
+            window.dispersionOptimizer = dispersionOptimizer; // legacy alias
             
             // SPRINT 9: Initialize Product Selector Modal
             productSelectorModal = new ProductSelectorModal();
@@ -33581,63 +33753,57 @@
             // SPRINT 17: Restore collapsible section states
             restoreSectionStates();
             
-            // Component cards - SPRINT 9: Show product selector instead of direct add
-            // SPRINT 20.5: Support data-category attribute for Y-Laser products
-            // SPRINT 24: Direct add for single-product categories (Virtual Probe)
-            document.querySelectorAll('.component-card').forEach(card => {
-                card.addEventListener('click', () => {
+            // ═══════════════════════════════════════════════════════════
+            // SPRINT 43: Event delegation for sidebar-left
+            // Single listener replaces N per-card/tab/view-btn listeners.
+            // ═══════════════════════════════════════════════════════════
+            document.getElementById('sidebar-left').addEventListener('click', (e) => {
+                // --- Component cards (SPRINT 9 / 20.5 / 24) ---
+                const card = e.target.closest('.component-card');
+                if (card) {
                     const cardId = card.dataset.id;
-                    // Check for explicit category attribute first (Y-Laser products)
                     let category = card.dataset.category || productRepository.getCategoryForCardId(cardId);
-                    
+
                     // SPRINT 24: Direct add for virtual-probe (single product, free tool)
                     if (cardId === 'virtual-probe') {
                         sceneManager.addComponent('virtual-probe');
                         return;
                     }
-                    
+
                     if (category) {
-                        // Check if category has only one product - direct add
                         const products = productRepository.getProductsByCategory(category);
                         if (products.length === 1) {
                             sceneManager.addComponent(products[0].id);
                             return;
                         }
-                        
-                        // Show product selector modal
-                        productSelectorModal.show(category, (productId, product) => {
-                            // Callback when product is selected
+                        productSelectorModal.show(category, (productId) => {
                             sceneManager.addComponent(productId);
                         });
                     } else {
-                        // Fallback: direct add (for legacy compatibility)
                         sceneManager.addComponent(cardId);
                     }
-                });
-            });
+                    return;
+                }
 
-            // Library Tab Switching
-            document.querySelectorAll('.library-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active from all tabs
+                // --- Library tab switching ---
+                const tab = e.target.closest('.library-tab');
+                if (tab) {
                     document.querySelectorAll('.library-tab').forEach(t => t.classList.remove('active'));
-                    // Remove active from all tab contents
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    
-                    // Activate clicked tab
                     tab.classList.add('active');
                     const tabId = 'tab-' + tab.dataset.tab;
                     document.getElementById(tabId)?.classList.add('active');
-                });
-            });
+                    return;
+                }
 
-            // View buttons
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
+                // --- View buttons ---
+                const viewBtn = e.target.closest('.view-btn');
+                if (viewBtn) {
                     document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    sceneManager.setView(btn.dataset.view);
-                });
+                    viewBtn.classList.add('active');
+                    sceneManager.setView(viewBtn.dataset.view);
+                    return;
+                }
             });
 
             // Settings
@@ -34004,9 +34170,13 @@
             console.log('');
             
             // ═══════════════════════════════════════════════════════════════
-            // SPRINT 16 DEBUG: Global test function for pulse measurement
+            // SPRINT 43: Debug functions gated behind #debug hash
+            // Use: Open page with #debug in URL to enable test utilities
             // ═══════════════════════════════════════════════════════════════
-            window.testPulseFlow = function() {
+            if (location.hash === '#debug') {
+
+            // SPRINT 16 DEBUG: Global test function for pulse measurement
+            PN.testPulseFlow = window.testPulseFlow = function() {
                 console.log('═══════════════════════════════════════════════════');
                 console.log('🧪 TESTING PULSE MEASUREMENT DATA FLOW');
                 console.log('═══════════════════════════════════════════════════');
@@ -34087,11 +34257,9 @@
                 sceneManager.updateBOM();
             };
             
-            // ═══════════════════════════════════════════════════════════════
             // SPRINT 34.1 DEBUG: Test GDD multi-bounce accumulation
             // Use: testGDDMultiBounce() in console
-            // ═══════════════════════════════════════════════════════════════
-            window.testGDDMultiBounce = function() {
+            PN.testGDDMultiBounce = window.testGDDMultiBounce = function() {
                 console.log('═══════════════════════════════════════════════════');
                 console.log('🧪 TESTING GDD MULTI-BOUNCE ACCUMULATION');
                 console.log('═══════════════════════════════════════════════════');
@@ -34183,8 +34351,9 @@
             };
             
             console.log('');
-            console.log('🔧 DEBUG: Run testPulseFlow() in console to test pulse measurement');
+            console.log('🔧 DEBUG: Run testPulseFlow() or testGDDMultiBounce() in console');
             console.log('');
+            } // end #debug gate
 
             // ═══════════════════════════════════════════════════════════
             // SPRINT 42: Bulk aria-label from data-tooltip for accessibility
