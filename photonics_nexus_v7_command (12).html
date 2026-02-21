@@ -7405,6 +7405,21 @@
         // GLOBAL STATE
         // ═══════════════════════════════════════════════════════════════════
         
+        // ═══════════════════════════════════════════════════════════════
+        // SPRINT 42: HTML Sanitizer utility — prevent XSS in innerHTML
+        // Escapes HTML special characters in user-facing strings.
+        // Use for any dynamic content interpolated into innerHTML.
+        // ═══════════════════════════════════════════════════════════════
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return String(str ?? '');
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         const GlobalState = {
             beamHeight: 0.050,
             snapDistance: 0.025,
@@ -8764,6 +8779,12 @@
                             verticalRes: 8           // bits
                         },
                         lockedParams: ['bandwidth', 'sampleRate'],
+                        // SPRINT 42: Constraints for validator checks
+                        constraints: {
+                            wavelengthRange: [400, 2000],     // nm — broadband Si/InGaAs detector
+                            damageThreshold: 0.5,             // J/cm² — sensitive electronics
+                            maxCWPower: 1.0                   // W — input optical power limit
+                        },
                         visual: { width: 0.100, height: 0.060, depth: 0.080 },
                         price: 4500,
                         inStock: true
@@ -8784,6 +8805,12 @@
                             verticalRes: 10          // bits
                         },
                         lockedParams: ['bandwidth', 'sampleRate'],
+                        // SPRINT 42: Constraints for validator checks
+                        constraints: {
+                            wavelengthRange: [400, 2000],     // nm — broadband Si/InGaAs detector
+                            damageThreshold: 0.5,             // J/cm² — sensitive electronics
+                            maxCWPower: 5.0                   // W — higher-end model
+                        },
                         visual: { width: 0.100, height: 0.060, depth: 0.080 },
                         price: 18000,
                         inStock: true
@@ -8804,13 +8831,19 @@
                             verticalRes: 10          // bits
                         },
                         lockedParams: ['bandwidth', 'sampleRate'],
+                        // SPRINT 42: Constraints for validator checks
+                        constraints: {
+                            wavelengthRange: [400, 2000],     // nm — broadband Si/InGaAs detector
+                            damageThreshold: 0.5,             // J/cm² — sensitive electronics
+                            maxCWPower: 10.0                  // W — premium model
+                        },
                         visual: { width: 0.120, height: 0.070, depth: 0.090 },
                         price: 85000,
                         inStock: true
                     }
                 ]
             },
-            
+
             // ═══════════════════════════════════════════════════════════════
             // SPRINT 15: PHOTODETECTORS (Optical-to-electrical conversion)
             // ═══════════════════════════════════════════════════════════════
@@ -8836,6 +8869,12 @@
                             detectorType: "slow"
                         },
                         lockedParams: ['riseTime', 'bandwidth'],
+                        // SPRINT 42: Constraints — Si detector spectral range
+                        constraints: {
+                            wavelengthRange: [400, 1100],     // nm — matches physics.spectralRange
+                            damageThreshold: 0.1,             // J/cm² — large active area, moderate LIDT
+                            maxCWPower: 0.05                  // W — 50mW max (large area Si)
+                        },
                         visual: { diameter: 0.030, height: 0.025 },
                         price: 450,
                         inStock: true
@@ -8857,6 +8896,12 @@
                             detectorType: "fast"
                         },
                         lockedParams: ['riseTime', 'bandwidth'],
+                        // SPRINT 42: Constraints — fast Si/GaAs detector
+                        constraints: {
+                            wavelengthRange: [320, 1000],     // nm — matches physics.spectralRange
+                            damageThreshold: 0.05,            // J/cm² — small active area
+                            maxCWPower: 0.02                  // W — 20mW max
+                        },
                         visual: { diameter: 0.025, height: 0.020 },
                         price: 2800,
                         inStock: true
@@ -8878,13 +8923,19 @@
                             detectorType: "ultrafast"
                         },
                         lockedParams: ['riseTime', 'bandwidth'],
+                        // SPRINT 42: Constraints — ultrafast GaAs detector
+                        constraints: {
+                            wavelengthRange: [400, 900],      // nm — matches physics.spectralRange
+                            damageThreshold: 0.01,            // J/cm² — tiny active area, very sensitive
+                            maxCWPower: 0.005                 // W — 5mW max (ultrafast grade)
+                        },
                         visual: { diameter: 0.020, height: 0.015 },
                         price: 12000,
                         inStock: true
                     }
                 ]
             },
-            
+
             // ═══════════════════════════════════════════════════════════════
             // SPRINT 15: AUTOCORRELATORS (Femtosecond pulse measurement)
             // ═══════════════════════════════════════════════════════════════
@@ -8910,6 +8961,12 @@
                             measurementType: "intensity"
                         },
                         lockedParams: ['minPulseWidth', 'maxPulseWidth'],
+                        // SPRINT 42: Constraints — intensity autocorrelator
+                        constraints: {
+                            wavelengthRange: [700, 1100],     // nm — matches physics.wavelengthRange
+                            damageThreshold: 1.0,             // J/cm² — BBO crystal LIDT
+                            maxCWPower: 2.0                   // W — average power limit
+                        },
                         visual: { width: 0.080, height: 0.040, depth: 0.060 },
                         price: 22000,
                         inStock: true
@@ -8932,13 +8989,19 @@
                             phaseRetrieval: true
                         },
                         lockedParams: ['minPulseWidth', 'maxPulseWidth'],
+                        // SPRINT 42: Constraints — FROG with broadband phase matching
+                        constraints: {
+                            wavelengthRange: [600, 1600],     // nm — matches physics.wavelengthRange
+                            damageThreshold: 0.5,             // J/cm² — sensitive nonlinear crystal
+                            maxCWPower: 5.0                   // W — higher-end model
+                        },
                         visual: { width: 0.100, height: 0.050, depth: 0.080 },
                         price: 65000,
                         inStock: true
                     }
                 ]
             },
-            
+
             // ═══════════════════════════════════════════════════════════════
             // CATEGORY: PRISM PAIR COMPENSATORS (Geometric Dispersion Compensation)
             // SPRINT 41: Data-driven prism pair with Sellmeier-based GDD/TOD
@@ -10554,7 +10617,10 @@
                 // Get target constraints
                 const constraints = targetData?.constraints;
                 if (!constraints || !constraints.wavelengthRange) {
-                    // No wavelength constraints defined - assume OK
+                    // SPRINT 42: Log warning for missing constraints (aids debugging)
+                    if (targetData && targetData.type !== 'SOURCE') {
+                        console.warn(`⚠️ ValidatorManager: "${targetData?.shortName || targetData?.name}" (${targetData?.id}) missing constraints.wavelengthRange — validation skipped`);
+                    }
                     return {
                         valid: true,
                         code: 'OK_NO_CONSTRAINT',
@@ -10606,6 +10672,10 @@
             validateDamageThreshold(sourceData, targetData, beamState) {
                 const constraints = targetData?.constraints;
                 if (!constraints || !constraints.damageThreshold) {
+                    // SPRINT 42: Log warning for missing LIDT constraints
+                    if (targetData && targetData.type !== 'SOURCE') {
+                        console.warn(`⚠️ ValidatorManager: "${targetData?.shortName || targetData?.name}" (${targetData?.id}) missing constraints.damageThreshold — LIDT validation skipped`);
+                    }
                     return { valid: true, code: 'OK_NO_CONSTRAINT', severity: 'ok' };
                 }
                 
@@ -10680,6 +10750,10 @@
             validateCWPower(sourceData, targetData, beamState) {
                 const constraints = targetData?.constraints;
                 if (!constraints || !constraints.maxCWPower) {
+                    // SPRINT 42: Log warning for missing CW power constraints
+                    if (targetData && targetData.type !== 'SOURCE') {
+                        console.warn(`⚠️ ValidatorManager: "${targetData?.shortName || targetData?.name}" (${targetData?.id}) missing constraints.maxCWPower — CW power validation skipped`);
+                    }
                     return { valid: true, code: 'OK_NO_CONSTRAINT', severity: 'ok' };
                 }
                 
@@ -11439,21 +11513,22 @@
                         const gradient = productRepository.getCategoryInfo(product.categoryId)?.gradient 
                             || 'linear-gradient(135deg, #4ADE80, #22C55E)';
                         
+                        // SPRINT 42: XSS fix — sanitize product strings
                         return `
-                            <div class="rec-product-card" data-product-id="${product.id}">
+                            <div class="rec-product-card" data-product-id="${sanitizeHTML(product.id)}">
                                 <div class="compat-badge">✓ 兼容</div>
                                 <div class="product-icon" style="background: ${gradient};">
-                                    ${product.alignBehavior === 'reflect' ? '💿' : 
-                                      product.alignBehavior === 'transmit' ? '🔵' : 
+                                    ${product.alignBehavior === 'reflect' ? '💿' :
+                                      product.alignBehavior === 'transmit' ? '🔵' :
                                       product.alignBehavior === 'split' ? '⬛' : '📊'}
                                 </div>
                                 <div class="product-info">
-                                    <div class="product-name">${product.shortName || product.name}</div>
+                                    <div class="product-name">${sanitizeHTML(product.shortName || product.name)}</div>
                                     <div class="product-specs">
-                                        <span class="highlight">${specs}</span>
+                                        <span class="highlight">${sanitizeHTML(specs)}</span>
                                     </div>
                                 </div>
-                                <div class="product-price">$${product.price?.toLocaleString() || '---'}</div>
+                                <div class="product-price">$${Number(product.price)?.toLocaleString() || '---'}</div>
                             </div>
                         `;
                     }).join('');
@@ -15133,8 +15208,8 @@
                         <tr data-index="${index}">
                             <td>
                                 <div class="product-info">
-                                    <span class="product-name">${item.name}</span>
-                                    <span class="product-sku">${item.sku}</span>
+                                    <span class="product-name">${sanitizeHTML(item.name)}</span>
+                                    <span class="product-sku">${sanitizeHTML(item.sku)}</span>
                                 </div>
                             </td>
                             <td>
@@ -16881,10 +16956,11 @@
                 
                 // Specs — render as table rows (all core params, no slice)
                 const specs = this._extractSpecs(productData, component);
+                // SPRINT 42: XSS fix — sanitize spec labels and values
                 this.specsContainer.innerHTML = specs.map(spec => `
                     <div class="spec-row">
-                        <span class="spec-label">${spec.label}</span>
-                        <span class="spec-value${spec.highlight ? ' highlight' : ''}">${spec.value}</span>
+                        <span class="spec-label">${sanitizeHTML(spec.label)}</span>
+                        <span class="spec-value${spec.highlight ? ' highlight' : ''}">${sanitizeHTML(spec.value)}</span>
                     </div>
                 `).join('');
                 
@@ -17135,10 +17211,11 @@
             _showNoData(productId) {
                 this.nameEl.textContent = productId || 'Unknown';
                 this.typeEl.textContent = 'N/A';
+                // SPRINT 42: XSS fix — sanitize productId
                 this.specsContainer.innerHTML = `
                     <div class="quick-panel-no-data">
                         ⚠️ Product data not found<br>
-                        <span style="font-size:9px;opacity:0.5">ID: ${productId}</span>
+                        <span style="font-size:9px;opacity:0.5">ID: ${sanitizeHTML(productId)}</span>
                     </div>
                 `;
                 this.skuEl.textContent = '---';
@@ -18230,6 +18307,11 @@
                 // pf must be ≥ 8: at the spectral edge (pf·σ), the Gaussian field
                 // amplitude is exp(−pf²/2). For pf=8: exp(−32) ≈ 0 → no truncation.
                 // For pf=4: exp(−8) ≈ 3.4e−4 → creates visible sinc-like ringing.
+                // SPRINT 42: Zero-guard for tau0 in FFT broadening estimate
+                if (!tau0 || tau0 <= 0) {
+                    console.warn('⚠️ FFTEngine: tau0 ≤ 0, returning empty result');
+                    return { fwhm_TL: 0, fwhm_Chirp: 0, rms_TL: 0, rms_Chirp: 0 };
+                }
                 const tau_broadened_est = tau0 * Math.sqrt(
                     1 + Math.pow(4 * Math.log(2) * Math.abs(gdd) / (tau0 * tau0), 2)
                 );
@@ -18289,7 +18371,7 @@
                 const shifted_TL = timeDomain_TL.slice(half).concat(timeDomain_TL.slice(0, half));
                 
                 let envelope_TL = shifted_TL.map(c => Math.sqrt(c.re * c.re + c.im * c.im));
-                const maxEnv_TL = this._arrayMax(envelope_TL);
+                const maxEnv_TL = this._arrayMax(envelope_TL) || 1e-30; // SPRINT 42: zero-guard
                 const intensity_TL = envelope_TL.map(e => (e / maxEnv_TL) ** 2);
                 
                 // ── Chirped pulse (with GDD and TOD) ──
@@ -18308,7 +18390,7 @@
                 const shifted_Chirp = timeDomain_Chirp.slice(half).concat(timeDomain_Chirp.slice(0, half));
                 
                 let envelope_Chirp = shifted_Chirp.map(c => Math.sqrt(c.re * c.re + c.im * c.im));
-                const maxEnv_Chirp = this._arrayMax(envelope_Chirp);
+                const maxEnv_Chirp = this._arrayMax(envelope_Chirp) || 1e-30; // SPRINT 42: zero-guard
                 const intensity_Chirp = envelope_Chirp.map(e => (e / maxEnv_Chirp) ** 2);
                 
                 // ── Time array ──
@@ -19196,37 +19278,38 @@
                     const card = document.createElement('div');
                     card.className = 'recommendation-card' + (rec.isBest ? ' best' : '');
                     
+                    // SPRINT 42: XSS fix — sanitize string fields from product data
                     card.innerHTML = `
                         <div class="recommendation-product">
                             <div>
-                                <div class="recommendation-name">${rec.mirror.shortName || rec.mirror.name}</div>
-                                <div class="recommendation-sku">${rec.mirror.sku}</div>
+                                <div class="recommendation-name">${sanitizeHTML(rec.mirror.shortName || rec.mirror.name)}</div>
+                                <div class="recommendation-sku">${sanitizeHTML(rec.mirror.sku)}</div>
                             </div>
                         </div>
                         <div class="recommendation-details">
                             <div class="recommendation-detail">
-                                <div class="value">${rec.gddPerBounce} fs²</div>
+                                <div class="value">${Number(rec.gddPerBounce)} fs²</div>
                                 <div class="label">Per Bounce</div>
                             </div>
                             <div class="recommendation-detail">
-                                <div class="value">${rec.bounces}</div>
+                                <div class="value">${Number(rec.bounces)}</div>
                                 <div class="label">Bounces</div>
                             </div>
                             <div class="recommendation-detail">
-                                <div class="value">${rec.pairs} pairs</div>
+                                <div class="value">${Number(rec.pairs)} pairs</div>
                                 <div class="label">Mirrors</div>
                             </div>
                         </div>
                         <div class="recommendation-result">
                             <span class="result-label">Residual GDD:</span>
-                            <span class="result-value">${rec.residualGDD >= 0 ? '+' : ''}${rec.residualGDD.toFixed(0)} fs²</span>
+                            <span class="result-value">${rec.residualGDD >= 0 ? '+' : ''}${Number(rec.residualGDD).toFixed(0)} fs²</span>
                         </div>
                         <div class="recommendation-actions">
-                            <button class="btn-add-to-scene" data-mirror-id="${rec.mirror.id}" data-pairs="${rec.pairs}">
+                            <button class="btn-add-to-scene" data-mirror-id="${sanitizeHTML(rec.mirror.id)}" data-pairs="${Number(rec.pairs)}">
                                 <span class="icon">➕</span>
-                                Add ${rec.pairs} Pairs to Scene
+                                Add ${Number(rec.pairs)} Pairs to Scene
                             </button>
-                            <div class="recommendation-price">$${rec.totalPrice.toLocaleString()}</div>
+                            <div class="recommendation-price">$${Number(rec.totalPrice).toLocaleString()}</div>
                         </div>
                     `;
                     
@@ -22097,12 +22180,16 @@
                     
                     // Calculate pulse broadening from accumulated dispersion
                     // SPRINT 41.1: Use FFT when TOD is present for accuracy
+                    // SPRINT 42: Added zero-guard for tau0_orig; clarified Math.log(2)
                     if ((newPayload.accumulatedGDD !== 0 || newPayload.accumulatedTOD !== 0) && newPayload.pulseWidth > 0) {
                         const tau0_orig = newPayload.laserPulseWidth || newPayload.pulseWidth;
                         const gddTotal = newPayload.accumulatedGDD;
                         const todTotal = newPayload.accumulatedTOD || 0;
-                        
-                        if (Math.abs(todTotal) > 0.1) {
+
+                        // Zero-guard: tau0_orig must be positive for division
+                        if (!tau0_orig || tau0_orig <= 0) {
+                            console.warn('⚠️ BeamSystem: tau0_orig ≤ 0, skipping broadening calculation');
+                        } else if (Math.abs(todTotal) > 0.1) {
                             // Use FFT for accurate GDD+TOD broadening
                             try {
                                 const fftRes = FFTEngine.calculatePulseComparison(
@@ -22112,15 +22199,15 @@
                                     newPayload.pulseWidth = Math.round(fftRes.fwhm_Chirp);
                                 }
                             } catch(e) {
-                                // Fallback: GDD-only analytic
-                                const broadening = Math.sqrt(tau0_orig*tau0_orig + Math.pow(4 * Math.LN2 * gddTotal / tau0_orig, 2));
+                                // Fallback: GDD-only analytic — 4·ln(2) ≈ 2.7726
+                                const broadening = Math.sqrt(tau0_orig*tau0_orig + Math.pow(4 * Math.log(2) * gddTotal / tau0_orig, 2));
                                 if (broadening > tau0_orig * 1.01) {
                                     newPayload.pulseWidth = Math.round(broadening);
                                 }
                             }
                         } else {
-                            // GDD-only: analytic formula (fast)
-                            const broadening = Math.sqrt(tau0_orig*tau0_orig + Math.pow(4 * Math.LN2 * gddTotal / tau0_orig, 2));
+                            // GDD-only: analytic formula (fast) — τ_out = √(τ₀² + (4·ln2·GDD/τ₀)²)
+                            const broadening = Math.sqrt(tau0_orig*tau0_orig + Math.pow(4 * Math.log(2) * gddTotal / tau0_orig, 2));
                             if (broadening > tau0_orig * 1.01) {
                                 newPayload.pulseWidth = Math.round(broadening);
                             }
@@ -22361,19 +22448,37 @@
                 };
             }
 
+            // SPRINT 42: Proper disposal of materials (handles arrays + textures)
+            _disposeMaterial(material) {
+                if (!material) return;
+                const materials = Array.isArray(material) ? material : [material];
+                materials.forEach(m => {
+                    // Dispose associated textures to free GPU memory
+                    if (m.map) m.map.dispose();
+                    if (m.normalMap) m.normalMap.dispose();
+                    if (m.emissiveMap) m.emissiveMap.dispose();
+                    if (m.roughnessMap) m.roughnessMap.dispose();
+                    if (m.metalnessMap) m.metalnessMap.dispose();
+                    m.dispose();
+                });
+            }
+
+            // SPRINT 42: Recursive disposal of a Three.js object tree
+            _disposeObject(obj) {
+                if (obj.geometry) obj.geometry.dispose();
+                this._disposeMaterial(obj.material);
+                // Recurse into children (handles nested glow/shell groups)
+                if (obj.children && obj.children.length > 0) {
+                    // Copy array since removal mutates it
+                    [...obj.children].forEach(c => this._disposeObject(c));
+                }
+            }
+
             clear() {
                 while (this.beamGroup.children.length > 0) {
                     const child = this.beamGroup.children[0];
                     this.beamGroup.remove(child);
-                    if (child.geometry) child.geometry.dispose();
-                    if (child.material) child.material.dispose();
-                    // Also dispose children (glow, shell)
-                    if (child.children) {
-                        child.children.forEach(c => {
-                            if (c.geometry) c.geometry.dispose();
-                            if (c.material) c.material.dispose();
-                        });
-                    }
+                    this._disposeObject(child);
                 }
                 this.beams = [];
                 this.clippingWarnings = [];
@@ -26458,10 +26563,11 @@
                     let paramHTML = '';
                     
                     // Show SKU badge if product has SKU
+                    // SPRINT 42: XSS fix — sanitize SKU from product data
                     if (hasSKU) {
                         paramHTML += `
                             <div class="param-row" style="margin-bottom: 12px;">
-                                <span class="sku-badge">📦 ${productData.sku}</span>
+                                <span class="sku-badge">📦 ${sanitizeHTML(productData.sku)}</span>
                                 ${lockedParams.length > 0 ? '<span style="font-size:10px; color: var(--text-tertiary); margin-left: 8px;">🔒 Specs locked to catalog</span>' : ''}
                             </div>
                         `;
@@ -27206,7 +27312,7 @@
                             const recEl = document.getElementById('validation-recommendation');
                             if (firstError.recommendation) {
                                 recEl.style.display = 'block';
-                                recEl.innerHTML = `💡 ${firstError.recommendation}`;
+                                recEl.textContent = `💡 ${firstError.recommendation}`; // SPRINT 42: XSS fix
                             } else {
                                 recEl.style.display = 'none';
                             }
@@ -27222,18 +27328,21 @@
                                     productData
                                 );
                                 
+                                // SPRINT 42: XSS fix — use createElement instead of innerHTML with onclick
                                 if (recommendation) {
                                     recActionEl.style.display = 'block';
+                                    recActionEl.innerHTML = '';
                                     const isUpgrade = firstError.code === 'ERR_DAMAGE_THRESHOLD_EXCEEDED' ||
                                                      firstError.code === 'ERR_POWER_EXCEEDED';
-                                    recActionEl.innerHTML = `
-                                        <button class="recommendation-btn ${isUpgrade ? 'upgrade' : ''}" 
-                                                onclick="smartRecommendation.highlightProductsInLibrary(${JSON.stringify(recommendation.filterCriteria).replace(/"/g, '&quot;')})">
-                                            <span class="rec-icon">${recommendation.icon}</span>
-                                            <span class="rec-text">${recommendation.text}</span>
-                                            <span class="rec-arrow">→</span>
-                                        </button>
-                                    `;
+                                    const btn = document.createElement('button');
+                                    btn.className = `recommendation-btn ${isUpgrade ? 'upgrade' : ''}`;
+                                    btn.innerHTML = `<span class="rec-icon">${sanitizeHTML(recommendation.icon)}</span>` +
+                                        `<span class="rec-text">${sanitizeHTML(recommendation.text)}</span>` +
+                                        `<span class="rec-arrow">→</span>`;
+                                    btn.addEventListener('click', () => {
+                                        smartRecommendation.highlightProductsInLibrary(recommendation.filterCriteria);
+                                    });
+                                    recActionEl.appendChild(btn);
                                 }
                             }
                             
@@ -33287,7 +33396,29 @@
             themeManager = new ThemeManager();
             layoutManager = new LayoutManager();
             
-            sceneManager = new SceneManager(document.getElementById('canvas-container'));
+            // SPRINT 42: Wrap SceneManager init in try-catch for WebGL unavailability
+            try {
+                const canvasContainer = document.getElementById('canvas-container');
+                if (!canvasContainer) {
+                    throw new Error('canvas-container element not found in DOM');
+                }
+                sceneManager = new SceneManager(canvasContainer);
+            } catch (err) {
+                console.error('❌ SceneManager initialization failed:', err);
+                const container = document.getElementById('canvas-container') || document.body;
+                container.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                                height:100%;background:var(--bg-primary,#0a0a0f);color:var(--text-primary,#e8e8f0);
+                                font-family:Inter,sans-serif;text-align:center;padding:40px;gap:16px">
+                        <div style="font-size:48px">⚠️</div>
+                        <h2 style="margin:0;font-size:20px">3D Viewport Initialization Failed</h2>
+                        <p style="margin:0;color:#888;font-size:14px;max-width:400px">
+                            Please ensure your browser supports WebGL. Try updating your browser or enabling hardware acceleration.
+                        </p>
+                        <p style="margin:0;color:#555;font-size:12px;font-family:monospace">${err.message}</p>
+                    </div>`;
+                return; // Stop further initialization — all managers depend on sceneManager
+            }
             window.sceneManager = sceneManager;
             sceneManager.updateTheme(themeManager.currentTheme);
             
