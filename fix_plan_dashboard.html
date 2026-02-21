@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photonics Nexus — 修复计划仪表板</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg-deep: #0a0a0f;
+    --bg-card: #12121a;
+    --bg-card-hover: #1a1a28;
+    --bg-surface: #16162280;
+    --border: #2a2a3a;
+    --border-glow: #3b3bff30;
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888a0;
+    --text-muted: #555570;
+    --accent-blue: #4d7cff;
+    --accent-cyan: #00d4ff;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --critical: #ff3b5c;
+    --critical-bg: #ff3b5c15;
+    --critical-border: #ff3b5c40;
+    --high: #ff8c42;
+    --high-bg: #ff8c4215;
+    --high-border: #ff8c4240;
+    --medium: #ffc233;
+    --medium-bg: #ffc23315;
+    --medium-border: #ffc23340;
+    --low: #4dff9f;
+    --low-bg: #4dff9f15;
+    --low-border: #4dff9f40;
+    --success: #10b981;
+    --glow: 0 0 20px rgba(77, 124, 255, 0.15);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid effect */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(rgba(77,124,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(77,124,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* === HEADER === */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .header-tag {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 42px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff, var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+  }
+  .header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* === STATS ROW === */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+  }
+  .stat-card:hover {
+    border-color: var(--accent-blue);
+    box-shadow: var(--glow);
+    transform: translateY(-2px);
+  }
+  .stat-number {
+    font-size: 36px;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  .stat-card.critical .stat-number { color: var(--critical); }
+  .stat-card.high .stat-number { color: var(--high); }
+  .stat-card.medium .stat-number { color: var(--medium); }
+  .stat-card.low .stat-number { color: var(--low); }
+  .stat-card.total .stat-number { color: var(--accent-cyan); }
+  .stat-card.score .stat-number { color: var(--accent-purple); }
+
+  /* === PROGRESS BAR === */
+  .progress-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 40px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .progress-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .progress-percent {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+  }
+  .progress-bar-bg {
+    height: 10px;
+    background: #1e1e30;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+  }
+  .progress-stats {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .progress-stats span strong {
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* === PHASE TABS === */
+  .phase-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .phase-tab {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .phase-tab:hover { border-color: var(--accent-blue); color: var(--text-primary); }
+  .phase-tab.active {
+    background: linear-gradient(135deg, rgba(77,124,255,0.15), rgba(139,92,246,0.1));
+    border-color: var(--accent-blue);
+    color: #fff;
+  }
+  .phase-tab .phase-count {
+    background: rgba(255,255,255,0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .phase-tab.active .phase-count {
+    background: rgba(77,124,255,0.3);
+    color: var(--accent-cyan);
+  }
+
+  /* === ISSUE CARDS === */
+  .phase-content { display: none; }
+  .phase-content.active { display: block; }
+
+  .phase-header {
+    margin-bottom: 24px;
+  }
+  .phase-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .phase-header .phase-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .issue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .issue-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+  .issue-card:hover {
+    border-color: var(--border-glow);
+    box-shadow: var(--glow);
+  }
+  .issue-card.done {
+    opacity: 0.5;
+    border-color: var(--success);
+  }
+  .issue-card.done .issue-title { text-decoration: line-through; }
+
+  .issue-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    user-select: none;
+  }
+
+  .issue-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+  .issue-card.done .issue-checkbox {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .issue-card.done .issue-checkbox::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .severity-badge {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .severity-badge.critical { background: var(--critical-bg); color: var(--critical); border: 1px solid var(--critical-border); }
+  .severity-badge.high { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-border); }
+  .severity-badge.medium { background: var(--medium-bg); color: var(--medium); border: 1px solid var(--medium-border); }
+  .severity-badge.low { background: var(--low-bg); color: var(--low); border: 1px solid var(--low-border); }
+
+  .issue-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .issue-effort {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255,255,255,0.05);
+    padding: 3px 10px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .issue-expand {
+    color: var(--text-muted);
+    font-size: 18px;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+  .issue-card.expanded .issue-expand { transform: rotate(180deg); }
+
+  .issue-detail {
+    display: none;
+    padding: 0 20px 20px 54px;
+    animation: slideDown 0.3s ease;
+  }
+  .issue-card.expanded .issue-detail { display: block; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .issue-meta-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .meta-item strong { color: var(--text-primary); }
+
+  .issue-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .code-block {
+    background: #0d0d18;
+    border: 1px solid #222238;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin: 12px 0;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #c0c0d0;
+  }
+  .code-block .comment { color: #6a6a8a; }
+  .code-block .keyword { color: var(--accent-purple); }
+  .code-block .string { color: var(--success); }
+  .code-block .danger { color: var(--critical); background: var(--critical-bg); padding: 0 4px; border-radius: 3px; }
+  .code-block .fix { color: var(--success); background: var(--low-bg); padding: 0 4px; border-radius: 3px; }
+
+  .fix-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 16px 0 8px;
+  }
+  .fix-section-label.before { color: var(--critical); }
+  .fix-section-label.after { color: var(--success); }
+
+  /* === ROADMAP TIMELINE === */
+  .roadmap {
+    margin-top: 48px;
+    padding: 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .roadmap h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 24px;
+  }
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: -32px;
+    top: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: white;
+  }
+  .timeline-item:nth-child(1) .timeline-dot { background: var(--critical); box-shadow: 0 0 12px rgba(255,59,92,0.4); }
+  .timeline-item:nth-child(2) .timeline-dot { background: var(--high); box-shadow: 0 0 12px rgba(255,140,66,0.4); }
+  .timeline-item:nth-child(3) .timeline-dot { background: var(--accent-purple); box-shadow: 0 0 12px rgba(139,92,246,0.4); }
+  .timeline-item:nth-child(4) .timeline-dot { background: var(--success); box-shadow: 0 0 12px rgba(16,185,129,0.4); }
+
+  .timeline-content h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .timeline-content .timeline-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .timeline-content p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .timeline-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .timeline-tag {
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  /* === FOOTER === */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .footer a { color: var(--accent-blue); text-decoration: none; }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 28px; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-card { padding: 14px 10px; }
+    .stat-number { font-size: 24px; }
+    .phase-nav { gap: 4px; }
+    .phase-tab { padding: 8px 12px; font-size: 12px; }
+    .issue-header { padding: 12px 14px; gap: 8px; }
+    .issue-detail { padding: 0 14px 14px 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-tag">Code Audit Fix Plan</div>
+    <h1>Photonics Nexus 修复计划</h1>
+    <p>基于 v33.2 审计报告的 87 项问题，按优先级分4阶段执行</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card total"><div class="stat-number" id="stat-total">87</div><div class="stat-label">总问题数</div></div>
+    <div class="stat-card critical"><div class="stat-number">12</div><div class="stat-label">Critical</div></div>
+    <div class="stat-card high"><div class="stat-number">28</div><div class="stat-label">High</div></div>
+    <div class="stat-card medium"><div class="stat-number">31</div><div class="stat-label">Medium</div></div>
+    <div class="stat-card low"><div class="stat-number">16</div><div class="stat-label">Low</div></div>
+    <div class="stat-card score"><div class="stat-number">7.0</div><div class="stat-label">质量评分 / 10</div></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-section">
+    <div class="progress-header">
+      <h3>修复进度</h3>
+      <div class="progress-percent" id="progress-percent">0%</div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <div class="progress-stats">
+      <span>已完成: <strong id="done-count">0</strong></span>
+      <span>剩余: <strong id="remaining-count">20</strong></span>
+      <span>预计工时: <strong id="effort-display">~76h</strong></span>
+    </div>
+  </div>
+
+  <!-- PHASE TABS -->
+  <div class="phase-nav" id="phase-nav">
+    <button class="phase-tab active" data-phase="1">
+      Phase 1: 紧急修复 <span class="phase-count">6</span>
+    </button>
+    <button class="phase-tab" data-phase="2">
+      Phase 2: 高优改进 <span class="phase-count">6</span>
+    </button>
+    <button class="phase-tab" data-phase="3">
+      Phase 3: 架构优化 <span class="phase-count">6</span>
+    </button>
+    <button class="phase-tab" data-phase="4">
+      Phase 4: 持续打磨 <span class="phase-count">5</span>
+    </button>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase-content active" id="phase-1">
+    <div class="phase-header">
+      <h2>Phase 1: 紧急修复</h2>
+      <div class="phase-meta">预计 1–2 天 ｜ 阻塞运行时崩溃、数据损坏、安全漏洞</div>
+    </div>
+    <div class="issue-list" id="issues-1"></div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-content" id="phase-2">
+    <div class="phase-header">
+      <h2>Phase 2: 高优改进</h2>
+      <div class="phase-meta">预计 1–2 周 ｜ 提升可靠性、无障碍、性能</div>
+    </div>
+    <div class="issue-list" id="issues-2"></div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-content" id="phase-3">
+    <div class="phase-header">
+      <h2>Phase 3: 架构优化</h2>
+      <div class="phase-meta">预计 2–4 周 ｜ 长期可维护性和可扩展性</div>
+    </div>
+    <div class="issue-list" id="issues-3"></div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase-content" id="phase-4">
+    <div class="phase-header">
+      <h2>Phase 4: 持续打磨</h2>
+      <div class="phase-meta">持续进行 ｜ 性能调优、代码整洁、标准合规</div>
+    </div>
+    <div class="issue-list" id="issues-4"></div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="roadmap">
+    <h2>修复路线图</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot">1</div>
+        <div class="timeline-content">
+          <h3>Phase 1 — 紧急修复 (Day 1–2)</h3>
+          <div class="timeline-meta">~4.5h ｜ CRITICAL 级</div>
+          <p>修复 11 个产品缺失的 constraints 块、物理引擎除零错误、Three.js 材料内存泄漏、8 处 innerHTML XSS 风险、SceneManager 初始化无 try-catch。</p>
+          <div class="timeline-tags">
+            <span class="timeline-tag">数据完整性</span>
+            <span class="timeline-tag">安全</span>
+            <span class="timeline-tag">崩溃预防</span>
+            <span class="timeline-tag">内存泄漏</span>
+          </div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">2</div>
+        <div class="timeline-content">
+          <h3>Phase 2 — 高优改进 (Week 1–2)</h3>
+          <div class="timeline-meta">~18h ｜ HIGH 级</div>
+          <p>事件监听器引用管理、ARIA 无障碍标签、组件链校验、验证缓存重置、Undo/Redo 序列化修复、射线追踪超时保护。</p>
+          <div class="timeline-tags">
+            <span class="timeline-tag">可靠性</span>
+            <span class="timeline-tag">无障碍</span>
+            <span class="timeline-tag">Undo/Redo</span>
+            <span class="timeline-tag">验证</span>
+          </div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">3</div>
+        <div class="timeline-content">
+          <h3>Phase 3 — 架构优化 (Week 2–4)</h3>
+          <div class="timeline-meta">~55h ｜ 重构级</div>
+          <p>拆分 SceneManager 上帝类、实现空间哈希索引加速射线追踪、事件委托、全局命名空间收敛、Dialog 原生组件、键盘导航。</p>
+          <div class="timeline-tags">
+            <span class="timeline-tag">架构</span>
+            <span class="timeline-tag">性能</span>
+            <span class="timeline-tag">语义化HTML</span>
+            <span class="timeline-tag">命名空间</span>
+          </div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">4</div>
+        <div class="timeline-content">
+          <h3>Phase 4 — 持续打磨 (Ongoing)</h3>
+          <div class="timeline-meta">持续 ｜ 优化级</div>
+          <p>FFT 原地算法减少内存分配、CSS 硬编码颜色迁移到变量、魔数提取为常量、完整 WCAG AA 合规审计。</p>
+          <div class="timeline-tags">
+            <span class="timeline-tag">内存优化</span>
+            <span class="timeline-tag">CSS整洁</span>
+            <span class="timeline-tag">WCAG AA</span>
+            <span class="timeline-tag">常量化</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Photonics Nexus Code Audit Fix Plan ・ 基于 2026-02-21 审计报告 ・ <a href="https://github.com/chengliu1130/photonic-exus" target="_blank">GitHub Repo</a>
+  </div>
+</div>
+
+<script>
+const ISSUES = [
+  // ===== PHASE 1: CRITICAL =====
+  {
+    phase: 1, id: 'P1-01', severity: 'critical', effort: '15 min',
+    title: '11 个产品缺失 constraints 块 — 验证器完全失效',
+    category: '数据层', lines: '7959–8939',
+    description: 'nanosource-100ps, nanosource-1ns, cwlaser-5, scope-1ghz/4ghz/20ghz, pd-slow/fast/ultrafast, ac-standard, ac-frog 这 11 个产品在 PRODUCT_CATALOG 中没有 constraints 块。ValidatorManager 读取 constraints.wavelengthRange 和 constraints.damageThreshold 时会拿到 undefined，导致所有波长/功率/口径校验被静默跳过。',
+    before: `<span class="comment">// 当前: nanosource-100ps (line ~7959)</span>
+{
+  id: <span class="string">"nanosource-100ps"</span>,
+  type: <span class="string">"SOURCE"</span>,
+  physics: { wavelength: 1064, initialPower: 0.5, ... },
+  visual: { width: 0.200, height: 0.070, depth: 0.140 },
+  price: 15000,
+  inStock: <span class="keyword">true</span>
+  <span class="danger">// ← 缺少 constraints 块!</span>
+}`,
+    after: `<span class="comment">// 修复: 添加 constraints 块</span>
+{
+  id: <span class="string">"nanosource-100ps"</span>,
+  type: <span class="string">"SOURCE"</span>,
+  physics: { wavelength: 1064, initialPower: 0.5, ... },
+  visual: { width: 0.200, height: 0.070, depth: 0.140 },
+  price: 15000,
+  inStock: <span class="keyword">true</span>,
+  <span class="fix">constraints: {
+    wavelengthRange: [1050, 1080],
+    maxPower: 1.0,
+    damageThreshold: 50
+  }</span>
+}`
+  },
+  {
+    phase: 1, id: 'P1-02', severity: 'critical', effort: '30 min',
+    title: '物理引擎除零风险 & Math.LN2 清晰度问题',
+    category: '物理引擎', lines: '22100–22123',
+    description: 'GDD 脉冲展宽公式中 tau0_orig 可能为 0，导致除以零产生 Infinity/NaN。虽然 Math.LN2 是有效的 JS 常量(≈0.693)，但在物理公式语境下用 Math.log(2) 更直观。此外 FFT 归一化的 maxEnv 和 RMS 宽度计算也缺少零值防护。',
+    before: `<span class="comment">// Line 22101</span>
+<span class="keyword">const</span> tau0_orig = newPayload.laserPulseWidth || newPayload.pulseWidth;
+
+<span class="comment">// Line 22116 — 除零风险!</span>
+<span class="keyword">const</span> broadening = Math.sqrt(
+  tau0_orig*tau0_orig +
+  Math.pow(<span class="danger">4 * Math.LN2 * gddTotal / tau0_orig</span>, 2)
+);`,
+    after: `<span class="comment">// 修复: 添加零值防护 + 明确 Math.log(2)</span>
+<span class="keyword">const</span> tau0_orig = newPayload.laserPulseWidth || newPayload.pulseWidth;
+<span class="fix">if (!tau0_orig || tau0_orig <= 0) {
+  console.warn('PhysicsEngine: tau0_orig is zero, skipping broadening calc');
+  return;  // 或使用安全默认值
+}</span>
+
+<span class="keyword">const</span> broadening = Math.sqrt(
+  tau0_orig*tau0_orig +
+  Math.pow(4 * <span class="fix">Math.log(2)</span> * gddTotal / tau0_orig, 2)
+);`
+  },
+  {
+    phase: 1, id: 'P1-03', severity: 'critical', effort: '20 min',
+    title: 'BeamSystem.clear() 材料数组未释放 — GPU 内存泄漏',
+    category: '核心管理器', lines: '22364–22380',
+    description: 'BeamSystem.clear() 使用 material.dispose() 释放材料，但没有检查 material 是否为数组（Three.js 多材料 mesh 的 material 属性是数组）。每帧更新泄漏 ~50-100KB GPU 显存。长时间会话下会导致性能严重下降。',
+    before: `<span class="comment">// Line 22370 — 只处理单一材料</span>
+<span class="keyword">if</span> (child.material) <span class="danger">child.material.dispose();</span>
+<span class="comment">// ↑ 如果 material 是数组则静默失败!</span>`,
+    after: `<span class="comment">// 修复: 处理材料数组 + 纹理清理</span>
+<span class="fix">if (child.material) {
+  const materials = Array.isArray(child.material)
+    ? child.material : [child.material];
+  materials.forEach(m => {
+    if (m.map) m.map.dispose();
+    if (m.normalMap) m.normalMap.dispose();
+    if (m.emissiveMap) m.emissiveMap.dispose();
+    m.dispose();
+  });
+}</span>`
+  },
+  {
+    phase: 1, id: 'P1-04', severity: 'critical', effort: '2h',
+    title: '8 处 innerHTML XSS 注入风险',
+    category: '安全', lines: '多处',
+    description: '8 个位置使用 innerHTML 注入动态插值内容：outputSpecsGrid(L16884)、推荐文本(L19199)、推荐按钮(L27229)、测量卡片(L30225)、产品卡片等。虽然当前数据来自受控的 PRODUCT_CATALOG，但未来用户可编辑标签或导入项目数据时会成为 XSS 攻击面。',
+    before: `<span class="comment">// Line 27209 — 推荐文本直接注入</span>
+recEl.<span class="danger">innerHTML</span> = \`💡 \${firstError.recommendation}\`;
+
+<span class="comment">// Line 19199 — 推荐卡片用 innerHTML</span>
+card.<span class="danger">innerHTML</span> = \`
+  &lt;div class="recommendation-name"&gt;\${rec.mirror.shortName}&lt;/div&gt;
+  &lt;button data-mirror-id="\${rec.mirror.id}"&gt;添加&lt;/button&gt;
+\`;`,
+    after: `<span class="comment">// 修复方案 A: 纯文本用 textContent</span>
+recEl.<span class="fix">textContent</span> = \`💡 \${firstError.recommendation}\`;
+
+<span class="comment">// 修复方案 B: 结构化 HTML 用 createElement</span>
+<span class="fix">const nameDiv = document.createElement('div');
+nameDiv.className = 'recommendation-name';
+nameDiv.textContent = rec.mirror.shortName;
+card.replaceChildren(nameDiv, btn);</span>
+
+<span class="comment">// 修复方案 C: 如必须用 innerHTML，先 sanitize</span>
+<span class="fix">function sanitize(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}</span>`
+  },
+  {
+    phase: 1, id: 'P1-05', severity: 'critical', effort: '15 min',
+    title: 'SceneManager 初始化无 try-catch — WebGL 不可用时白屏',
+    category: '初始化', lines: '33290',
+    description: 'SceneManager 构造函数调用 WebGLRenderer、OrbitControls、UnrealBloomPass，如果 WebGL 不可用或 canvas-container 元素为 null，错误直接向上抛出，整个应用静默崩溃为白屏，无任何用户提示。',
+    before: `<span class="comment">// Line 33290 — 无保护</span>
+<span class="danger">sceneManager = new SceneManager(
+  document.getElementById('canvas-container')
+);</span>`,
+    after: `<span class="comment">// 修复: 包裹 try-catch + 用户友好的错误提示</span>
+<span class="fix">try {
+  const container = document.getElementById('canvas-container');
+  if (!container) throw new Error('canvas-container not found');
+  sceneManager = new SceneManager(container);
+} catch (err) {
+  console.error('SceneManager init failed:', err);
+  document.body.innerHTML = \`
+    &lt;div style="display:grid;place-items:center;height:100vh;
+                background:#0a0a0f;color:#e8e8f0;font-family:sans-serif;
+                text-align:center;padding:40px"&gt;
+      &lt;div&gt;
+        &lt;h1&gt;⚠️ 初始化失败&lt;/h1&gt;
+        &lt;p&gt;请确保浏览器支持 WebGL&lt;/p&gt;
+        &lt;p style="color:#888;font-size:13px"&gt;\${err.message}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;\`;
+}</span>`
+  },
+  {
+    phase: 1, id: 'P1-06', severity: 'critical', effort: '15 min',
+    title: 'ValidatorManager 缺少 constraints 空值防护',
+    category: '数据层', lines: '10555–10681',
+    description: '即使修复了缺失的 constraints 块，ValidatorManager 也应对 constraints 为 undefined 的情况做防御性编程。目前访问 targetData?.constraints?.wavelengthRange 虽然不会崩溃（optional chaining），但会静默跳过校验，用户无感知。',
+    before: `<span class="comment">// 当前: 静默跳过</span>
+<span class="keyword">const</span> range = targetData?.constraints?.wavelengthRange;
+<span class="keyword">if</span> (range && (wl < range[0] || wl > range[1])) {
+  <span class="comment">// 报告错误...</span>
+}
+<span class="danger">// ← 如果 constraints 不存在，什么也不做</span>`,
+    after: `<span class="comment">// 修复: constraints 缺失时记录警告</span>
+<span class="keyword">const</span> range = targetData?.constraints?.wavelengthRange;
+<span class="fix">if (!targetData?.constraints) {
+  console.warn(\`ValidatorManager: "\${targetData?.name}" 缺少 constraints 块\`);
+}</span>
+<span class="keyword">if</span> (range && (wl < range[0] || wl > range[1])) {
+  <span class="comment">// 报告错误...</span>
+}`
+  },
+
+  // ===== PHASE 2: HIGH =====
+  {
+    phase: 2, id: 'P2-01', severity: 'high', effort: '3h',
+    title: '所有 pointer 事件监听器为匿名函数 — 无法移除',
+    category: '核心管理器', lines: '24388–25056',
+    description: '6 个 DOM 事件监听器（pointerdown/move/up/leave/cancel、dblclick）全部使用匿名箭头函数绑定到 renderer.domElement。没有存储引用，无法通过 removeEventListener 清除。如果 SceneManager 被重新实例化，旧监听器会堆积导致内存泄漏和重复处理。',
+    before: `<span class="comment">// Line 24388 — 匿名闭包, 无法移除</span>
+this.renderer.domElement.addEventListener(<span class="string">'pointerdown'</span>, <span class="danger">(event) => {
+  // 800+ 行处理逻辑...
+}</span>);`,
+    after: `<span class="comment">// 修复: 存储引用 + 提供 dispose 方法</span>
+<span class="fix">this._onPointerDown = (event) => {
+  // 处理逻辑...
+};
+this.renderer.domElement.addEventListener('pointerdown', this._onPointerDown);
+
+// 在 dispose() 方法中:
+dispose() {
+  this.renderer.domElement.removeEventListener('pointerdown', this._onPointerDown);
+  // ... 其他5个监听器同理
+}</span>`
+  },
+  {
+    phase: 2, id: 'P2-02', severity: 'high', effort: '2h',
+    title: '76 个按钮缺失 aria-label — 屏幕阅读器不可用',
+    category: '无障碍', lines: '6111–7382',
+    description: '文件中零个 aria-label 属性。76 个 <button> 元素全部缺失无障碍标签。主题按钮只有 title 属性，工具栏按钮使用自定义 data-tooltip，面板关闭按钮只有 × 字符。SVG 图标无 <title> 元素。WCAG 2.1 Level A 不合规。',
+    before: `<span class="comment">// 无 aria-label, 屏幕阅读器只会读到 "按钮"</span>
+&lt;button class=<span class="string">"theme-btn"</span> title=<span class="string">"Dark"</span>&gt;
+  <span class="danger">&lt;!-- 只有 SVG 图标, 无文字 --&gt;</span>
+&lt;/button&gt;`,
+    after: `<span class="comment">// 修复: 添加 aria-label</span>
+&lt;button class=<span class="string">"theme-btn"</span> title=<span class="string">"Dark"</span>
+  <span class="fix">aria-label="切换到暗色主题"</span>&gt;
+  &lt;svg&gt;<span class="fix">&lt;title&gt;暗色主题&lt;/title&gt;</span>...&lt;/svg&gt;
+&lt;/button&gt;`
+  },
+  {
+    phase: 2, id: 'P2-03', severity: 'high', effort: '4h',
+    title: '缺失组件类型链校验 — SOURCE→SOURCE 应被阻止',
+    category: '数据层', lines: 'ValidatorManager',
+    description: '当前没有光路链中组件类型顺序的校验。允许 SOURCE 连接到 SOURCE、DETECTOR 出现在链中间。棱镜对入射角允许 30°–80° 但不警告偏离布儒斯特角(~59° for SF10)。脉冲整形器波长容差未定义。',
+    before: `<span class="comment">// 当前: 无组件类型链校验</span>
+<span class="comment">// SOURCE → SOURCE: 无警告 ❌</span>
+<span class="comment">// DETECTOR → OPTIC: 无警告 ❌</span>
+<span class="comment">// PRISM angle 30°: 无布儒斯特角警告 ❌</span>`,
+    after: `<span class="comment">// 修复: 在 ValidatorManager 添加类型链规则</span>
+<span class="fix">const TYPE_CHAIN_RULES = {
+  SOURCE:   { canFollow: [],       terminal: false },
+  OPTIC:    { canFollow: ['SOURCE','OPTIC','COMPRESSOR'], terminal: false },
+  DETECTOR: { canFollow: ['SOURCE','OPTIC','COMPRESSOR'], terminal: true  },
+  ANALYZER: { canFollow: ['SOURCE','OPTIC','COMPRESSOR'], terminal: true  },
+};
+
+validateChainOrder(prev, current) {
+  const rules = TYPE_CHAIN_RULES[current.type];
+  if (rules && !rules.canFollow.includes(prev.type)) {
+    this.addError(\`\${current.type} 不能直接跟在 \${prev.type} 后面\`);
+  }
+}</span>`
+  },
+  {
+    phase: 2, id: 'P2-04', severity: 'high', effort: '1h',
+    title: '_validationToastShown 标志不随参数修改重置',
+    category: '状态管理', lines: '22690–22703, 28991',
+    description: '当验证 toast 显示后 _validationToastShown 设为 true，但只在组件替换、批量操作和全场景刷新时重置。如果用户修正问题后再次引入相同问题，toast 不会重新触发。应在每次 beam trace 周期开始时重置。',
+    before: `<span class="comment">// 当前: 只在特定操作中重置</span>
+<span class="comment">// Line 22690 — 设置后不再重新触发</span>
+<span class="keyword">if</span> (!hit.component.userData._validationToastShown) {
+  showToast(error);
+  hit.component.userData._validationToastShown = <span class="danger">true</span>;
+}`,
+    after: `<span class="comment">// 修复: 在 beam trace 开始时重置所有标志</span>
+<span class="fix">traceAllBeams() {
+  // 重置所有组件的 toast 标志
+  this.scene.children.forEach(entity => {
+    if (entity.userData?._validationToastShown) {
+      entity.userData._validationToastShown = false;
+    }
+  });
+  // ... 继续 trace
+}</span>`
+  },
+  {
+    phase: 2, id: 'P2-05', severity: 'high', effort: '4h',
+    title: 'CmdDelete 存储对象引用而非序列化状态 — save/load 后 undo 失效',
+    category: 'Undo/Redo', lines: 'HistoryManager',
+    description: 'CmdDelete 命令存储被删除的 Three.js 对象引用。项目 save/load 后这些引用变为陈旧（stale）。嵌套事务的 CmdBatchMove 不捕获父组变换，如果父组在快照后移动，undo 会将子组件放回错误位置。',
+    before: `<span class="comment">// 当前: 存储活跃对象引用</span>
+<span class="keyword">class</span> CmdDelete {
+  constructor(entity) {
+    <span class="danger">this.entity = entity;</span> <span class="comment">// 引用, 不是快照!</span>
+  }
+  undo() {
+    scene.add(<span class="danger">this.entity</span>); <span class="comment">// save/load 后为空!</span>
+  }
+}`,
+    after: `<span class="comment">// 修复: 序列化完整组件状态</span>
+<span class="fix">class CmdDelete {
+  constructor(entity, serializer) {
+    this.snapshot = serializer.serializeEntity(entity);
+    this.parentId = entity.userData?.parent || null;
+  }
+  undo() {
+    const restored = serializer.deserializeEntity(this.snapshot);
+    if (this.parentId) {
+      // 恢复到正确的父组
+      const parent = scene.getObjectByName(this.parentId);
+      if (parent) parent.add(restored);
+    } else {
+      scene.add(restored);
+    }
+  }
+}</span>`
+  },
+  {
+    phase: 2, id: 'P2-06', severity: 'high', effort: '2h',
+    title: '射线追踪添加超时保护 — 递归分束器可冻结 UI',
+    category: '性能', lines: 'BeamSystem',
+    description: 'BeamSystem.findIntersection() 对所有组件做 O(n) 线性扫描。50 次最大反弹 × 30 个组件 × 3 个激光源 = 4,500 次相交测试/帧。含递归分束器的场景可能导致无限循环冻结 UI。',
+    before: `<span class="comment">// 当前: 无超时保护</span>
+traceRay(origin, direction, payload, <span class="danger">bounceCount</span>) {
+  <span class="keyword">if</span> (bounceCount > 50) <span class="keyword">return</span>;
+  <span class="comment">// ... 可能在分束器递归中卡死</span>
+}`,
+    after: `<span class="comment">// 修复: 添加时间超时 + 分束器深度限制</span>
+<span class="fix">traceRay(origin, direction, payload, bounceCount, startTime) {
+  startTime = startTime || performance.now();
+  if (bounceCount > 50) return;
+  if (performance.now() - startTime > 50) {
+    console.warn('BeamSystem: ray trace timeout (50ms)');
+    return;  // 防止 UI 冻结
+  }
+  // ...
+}</span>`
+  },
+
+  // ===== PHASE 3: ARCHITECTURE =====
+  {
+    phase: 3, id: 'P3-01', severity: 'high', effort: '40h',
+    title: '拆分 SceneManager 上帝类 (~7000 行 → 5 个专职类)',
+    category: '架构', lines: '18000–27000',
+    description: 'SceneManager 承担了: Three.js 场景管理、实体 CRUD、射线投射、拖拽/旋转变换、物理更新、参数编辑、BOM 更新、标注管理、Toast 通知、主题切换等 10+ 项职责。严重违反单一职责原则，使维护和扩展极其困难。',
+    before: `<span class="comment">// 当前: 一个类做所有事情 (~7000 行)</span>
+<span class="keyword">class</span> SceneManager {
+  <span class="comment">// 场景管理</span>
+  <span class="comment">// 实体 CRUD</span>
+  <span class="comment">// 射线投射</span>
+  <span class="comment">// 拖拽/旋转</span>
+  <span class="comment">// 物理更新</span>
+  <span class="comment">// 参数编辑</span>
+  <span class="comment">// BOM/标注/Toast...</span>
+  <span class="danger">// 7000 行全在这里</span>
+}`,
+    after: `<span class="comment">// 修复: 拆分为 5 个专职类</span>
+<span class="fix">class SceneManager      { }  // Three.js 场景、渲染、后处理
+class TransformController { }  // 拖拽、旋转、缩放
+class SelectionManager    { }  // 选择、多选、框选
+class ComponentCreator    { }  // 实体 CRUD、3D 模型创建
+class PhysicsUpdater      { }  // 物理参数更新、beam 刷新
+
+// 通过事件总线通信
+const EventBus = new EventTarget();
+EventBus.addEventListener('component:added', (e) => {
+  physicsUpdater.onComponentAdded(e.detail);
+});</span>`
+  },
+  {
+    phase: 3, id: 'P3-02', severity: 'high', effort: '8h',
+    title: '实现空间哈希网格加速射线追踪',
+    category: '性能', lines: 'BeamSystem.findIntersection',
+    description: '当前射线追踪对每个射线段做 O(n) 全组件遍历。30 个组件已经产生 4500 次/帧测试。目标: 通过空间哈希实现 O(1) 平均查找，支持 100+ 组件场景。',
+    before: `<span class="comment">// 当前: O(n) 线性扫描</span>
+findIntersection(origin, direction) {
+  <span class="keyword">let</span> closest = <span class="keyword">null</span>;
+  <span class="keyword">for</span> (<span class="keyword">const</span> entity <span class="keyword">of</span> <span class="danger">this.allEntities</span>) {
+    <span class="comment">// 检查每一个...</span>
+  }
+}`,
+    after: `<span class="comment">// 修复: 空间哈希网格</span>
+<span class="fix">class SpatialGrid {
+  constructor(cellSize = 0.1) {
+    this.cellSize = cellSize;
+    this.cells = new Map();
+  }
+  getKey(x, z) {
+    return \`\${Math.floor(x/this.cellSize)},\${Math.floor(z/this.cellSize)}\`;
+  }
+  insert(entity) { ... }
+  query(origin, direction, maxDist) {
+    // Bresenham 沿射线步进, 只检查经过的格子
+  }
+}</span>`
+  },
+  {
+    phase: 3, id: 'P3-03', severity: 'medium', effort: '1h',
+    title: '收敛全局命名空间 → window.PhotonicsNexus',
+    category: '架构', lines: '33291–33853',
+    description: '21 个 window.* 赋值散落在代码中（含 5 个调试函数）。生产环境应收敛到单一命名空间，调试函数应置于开发标志后面。',
+    before: `<span class="comment">// 当前: 21 个独立的 window.* 赋值</span>
+<span class="danger">window.sceneManager = sceneManager;
+window.groupManager = groupManager;
+window.annotationManager = annotationManager;
+window.testPulseFlow = function() { ... };
+// ... 还有 17 个</span>`,
+    after: `<span class="comment">// 修复: 统一命名空间</span>
+<span class="fix">window.PhotonicsNexus = {
+  scene: sceneManager,
+  groups: groupManager,
+  annotations: annotationManager,
+  physics: physicsEngine,
+  // ...
+};
+
+// 调试工具仅在开发模式暴露
+if (location.hash === '#debug') {
+  window.PhotonicsNexus.debug = {
+    testPulseFlow, testGDDMultiBounce, testFROG
+  };
+}</span>`
+  },
+  {
+    phase: 3, id: 'P3-04', severity: 'medium', effort: '3h',
+    title: '模态框迁移到原生 <dialog> 元素',
+    category: 'HTML 语义化', lines: '3000–6500',
+    description: '所有模态框使用 <div> + CSS overlay 实现，缺少原生 focus trap、Escape 关闭、背景滚动锁定。<dialog> 元素内置这些功能且对屏幕阅读器友好。',
+    before: `<span class="comment">// 当前: div 模态框</span>
+&lt;div class=<span class="string">"modal-overlay"</span> id=<span class="string">"product-modal"</span>&gt;
+  <span class="danger">&lt;div class="modal-content"&gt;</span>
+    <span class="comment">&lt;!-- 无 focus trap, 无 ESC 支持 --&gt;</span>
+  &lt;/div&gt;
+&lt;/div&gt;`,
+    after: `<span class="comment">// 修复: 原生 dialog</span>
+<span class="fix">&lt;dialog id="product-modal"&gt;
+  &lt;form method="dialog"&gt;
+    &lt;!-- 内置 focus trap + ESC 关闭 --&gt;
+    &lt;button value="cancel"&gt;取消&lt;/button&gt;
+    &lt;button value="confirm"&gt;确定&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/dialog&gt;
+
+// JS:
+document.getElementById('product-modal').showModal();</span>`
+  },
+  {
+    phase: 3, id: 'P3-05', severity: 'medium', effort: '2h',
+    title: '动画循环性能: 节流标注更新 & 复用 Raycaster',
+    category: '性能', lines: '动画循环',
+    description: 'annotationManager.updateAllAnnotations() 每帧调用无节流。LightPulseAnimator.checkCollision() 每帧创建新的 THREE.Raycaster。updateMeasurementHub() 更新 N 个检测器卡片时为 O(n²)。scene.updateMatrixWorld(true) 在每次移动时强制递归矩阵重算。',
+    before: `<span class="comment">// 当前: 每帧都执行</span>
+<span class="keyword">function</span> animate() {
+  <span class="danger">annotationManager.updateAllAnnotations();</span>
+  <span class="danger">const ray = new THREE.Raycaster();</span> <span class="comment">// 每帧 new!</span>
+  <span class="danger">scene.updateMatrixWorld(true);</span> <span class="comment">// 强制全递归!</span>
+}`,
+    after: `<span class="comment">// 修复: 节流 + 复用</span>
+<span class="fix">// 1. 节流标注更新 (每 100ms)
+let lastAnnotUpdate = 0;
+if (now - lastAnnotUpdate > 100) {
+  annotationManager.updateAllAnnotations();
+  lastAnnotUpdate = now;
+}
+
+// 2. 复用 Raycaster
+const _sharedRaycaster = new THREE.Raycaster();
+
+// 3. 只在脏标记时更新矩阵
+if (this._matrixDirty) {
+  scene.updateMatrixWorld(true);
+  this._matrixDirty = false;
+}</span>`
+  },
+  {
+    phase: 3, id: 'P3-06', severity: 'medium', effort: '2h',
+    title: '事件委托优化 — 减少 DOM 事件监听器数量',
+    category: '性能', lines: '组件卡片/选项卡/工具栏',
+    description: '每个组件卡片、选项卡、工具栏按钮都有独立的 click 监听器。使用事件委托可以将 N 个监听器减少到 1 个，减少内存开销并简化动态元素管理。',
+    before: `<span class="comment">// 当前: 每个卡片独立监听</span>
+cards.forEach(card => {
+  <span class="danger">card.addEventListener('click', () => { ... });</span>
+});`,
+    after: `<span class="comment">// 修复: 事件委托</span>
+<span class="fix">cardContainer.addEventListener('click', (e) => {
+  const card = e.target.closest('.component-card');
+  if (!card) return;
+  const productId = card.dataset.id;
+  handleCardClick(productId);
+});</span>`
+  },
+
+  // ===== PHASE 4: POLISH =====
+  {
+    phase: 4, id: 'P4-01', severity: 'medium', effort: '4h',
+    title: 'FFT 原地算法 — 减少 3x 内存分配',
+    category: '性能优化', lines: '物理引擎 FFT',
+    description: '当前 IFFT 每次调用创建 3 个临时数组（共轭、结果、缩放）。N=131,072 时每次 FFT 对分配约 3MB 临时内存。实时拖拽更新场景下造成 GC 压力。改为原地（in-place）算法可减少 3 倍内存分配。',
+    before: `<span class="comment">// 当前: 3 个临时数组</span>
+ifft(data) {
+  <span class="danger">const conjugated = data.map(...);</span>   <span class="comment">// 1MB</span>
+  <span class="danger">const result = this.fft(conjugated);</span> <span class="comment">// 1MB</span>
+  <span class="danger">return result.map(v => v / N);</span>      <span class="comment">// 1MB</span>
+}`,
+    after: `<span class="comment">// 修复: 原地操作</span>
+<span class="fix">ifft(data) {
+  // 原地取共轭
+  for (let i = 0; i < data.length; i++) {
+    data[i].im = -data[i].im;
+  }
+  this.fftInPlace(data);
+  const invN = 1 / data.length;
+  for (let i = 0; i < data.length; i++) {
+    data[i].re *= invN;
+    data[i].im = -data[i].im * invN;
+  }
+  return data;
+}</span>`
+  },
+  {
+    phase: 4, id: 'P4-02', severity: 'medium', effort: '2h',
+    title: '20+ 硬编码颜色值迁移到 CSS 变量',
+    category: 'CSS 整洁', lines: '395–433',
+    description: '组件卡片的图标背景使用 20+ 处内联 style 硬编码渐变色，绕过了主题系统。这使得主题切换无法影响这些颜色，增加维护负担。',
+    before: `<span class="comment">// 当前: 硬编码在 HTML 中</span>
+<span class="danger">style="background: linear-gradient(135deg, #ff6b35, #ff8c42)"</span>`,
+    after: `<span class="comment">// 修复: 使用 CSS 变量 + 类</span>
+<span class="fix">.component-card[data-category="source"] .icon {
+  background: var(--card-gradient-source);
+}
+[data-theme="dark"]  { --card-gradient-source: linear-gradient(135deg, #ff6b35, #ff8c42); }
+[data-theme="light"] { --card-gradient-source: linear-gradient(135deg, #e55a2b, #f07038); }</span>`
+  },
+  {
+    phase: 4, id: 'P4-03', severity: 'low', effort: '15 min',
+    title: '主题名称无验证 + localStorage 无 try-catch',
+    category: '健壮性', lines: 'ThemeManager',
+    description: '主题切换接受任意字符串，不校验是否在允许列表中。localStorage 在隐私模式下可能抛出异常，但读写操作没有 try-catch。',
+    before: `<span class="comment">// 当前: 无验证</span>
+setTheme(name) {
+  document.body.dataset.theme = <span class="danger">name</span>; <span class="comment">// 任意字符串!</span>
+  <span class="danger">localStorage.setItem('theme', name);</span> <span class="comment">// 可能抛异常!</span>
+}`,
+    after: `<span class="comment">// 修复: 白名单 + try-catch</span>
+<span class="fix">const VALID_THEMES = ['light','dark','realistic','arctic','sunset'];
+
+setTheme(name) {
+  if (!VALID_THEMES.includes(name)) {
+    console.warn(\`Invalid theme: \${name}\`);
+    name = 'dark'; // 降级默认
+  }
+  document.body.dataset.theme = name;
+  try { localStorage.setItem('theme', name); } catch(e) {}
+}</span>`
+  },
+  {
+    phase: 4, id: 'P4-04', severity: 'low', effort: '1h',
+    title: 'Firefox 滑块样式兼容性修复',
+    category: 'CSS 兼容', lines: 'CSS 滑块样式',
+    description: '滑块使用 -webkit-appearance 和 -webkit-slider-thumb，但缺少 -moz-range-progress 和 -moz-range-thumb。Firefox 用户看到的是默认样式。',
+    before: `<span class="comment">// 当前: 只有 WebKit 前缀</span>
+input[type=range]::-webkit-slider-thumb { ... }
+<span class="danger">/* 缺少 Firefox 支持 */</span>`,
+    after: `<span class="comment">// 修复: 添加 Firefox 前缀</span>
+input[type=range]::-webkit-slider-thumb { ... }
+<span class="fix">input[type=range]::-moz-range-thumb {
+  /* 相同样式 */
+}
+input[type=range]::-moz-range-progress {
+  background: var(--accent-primary);
+}</span>`
+  },
+  {
+    phase: 4, id: 'P4-05', severity: 'low', effort: '15 min',
+    title: '消除冗余数据字段: damageThreshold 去重',
+    category: '数据整洁', lines: 'PRODUCT_CATALOG',
+    description: 'Power meter 的 damageThreshold 同时出现在 physics{} 和 constraints{} 中。ND filter 的 absorption 字段冗余（始终 = 1 - transmission）。冗余字段增加不一致风险。',
+    before: `<span class="comment">// 当前: 冗余字段</span>
+{
+  physics: { damageThreshold: <span class="danger">50</span> },
+  constraints: { damageThreshold: <span class="danger">50</span> }
+  <span class="comment">// ↑ 两处需要同步维护</span>
+}`,
+    after: `<span class="comment">// 修复: 单一来源 + 运行时取值</span>
+<span class="fix">{
+  physics: { damageThreshold: 50 },
+  // constraints 引用 physics 值:
+  get effectiveDamageThreshold() {
+    return this.constraints?.damageThreshold ?? this.physics.damageThreshold;
+  }
+}</span>`
+  }
+];
+
+// ============ APP LOGIC ============
+
+let issueStates = {};
+
+// Load from localStorage
+function loadState() {
+  try {
+    const saved = localStorage.getItem('photonics_fix_plan');
+    if (saved) issueStates = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('photonics_fix_plan', JSON.stringify(issueStates));
+  } catch(e) {}
+}
+
+function renderIssues() {
+  for (let phase = 1; phase <= 4; phase++) {
+    const container = document.getElementById(`issues-${phase}`);
+    const phaseIssues = ISSUES.filter(i => i.phase === phase);
+    container.innerHTML = phaseIssues.map(issue => {
+      const done = issueStates[issue.id] || false;
+      return `
+        <div class="issue-card ${done ? 'done' : ''}" data-id="${issue.id}">
+          <div class="issue-header" onclick="toggleExpand('${issue.id}')">
+            <div class="issue-checkbox" onclick="event.stopPropagation(); toggleDone('${issue.id}')"></div>
+            <span class="severity-badge ${issue.severity}">${issue.severity}</span>
+            <span class="issue-title">${issue.title}</span>
+            <span class="issue-effort">${issue.effort}</span>
+            <span class="issue-expand">▼</span>
+          </div>
+          <div class="issue-detail">
+            <div class="issue-meta-row">
+              <span class="meta-item">📂 <strong>${issue.category}</strong></span>
+              <span class="meta-item">📍 Lines: <strong>${issue.lines}</strong></span>
+              <span class="meta-item">⏱ Effort: <strong>${issue.effort}</strong></span>
+            </div>
+            <div class="issue-description">${issue.description}</div>
+            ${issue.before ? `
+              <div class="fix-section-label before">❌ 当前代码 (问题)</div>
+              <div class="code-block"><pre>${issue.before}</pre></div>
+              <div class="fix-section-label after">✅ 修复方案</div>
+              <div class="code-block"><pre>${issue.after}</pre></div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  updateProgress();
+}
+
+function toggleDone(id) {
+  issueStates[id] = !issueStates[id];
+  saveState();
+  renderIssues();
+}
+
+function toggleExpand(id) {
+  const card = document.querySelector(`.issue-card[data-id="${id}"]`);
+  if (card) card.classList.toggle('expanded');
+}
+
+function updateProgress() {
+  const total = ISSUES.length;
+  const done = ISSUES.filter(i => issueStates[i.id]).length;
+  const remaining = total - done;
+  const percent = Math.round((done / total) * 100);
+
+  document.getElementById('progress-percent').textContent = `${percent}%`;
+  document.getElementById('progress-bar').style.width = `${percent}%`;
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('remaining-count').textContent = remaining;
+
+  // Calculate remaining effort
+  const remainingIssues = ISSUES.filter(i => !issueStates[i.id]);
+  let totalMinutes = 0;
+  remainingIssues.forEach(i => {
+    const match = i.effort.match(/(\d+)\s*(h|min)/);
+    if (match) {
+      totalMinutes += match[2] === 'h' ? parseInt(match[1]) * 60 : parseInt(match[1]);
+    }
+  });
+  const hours = Math.round(totalMinutes / 60);
+  document.getElementById('effort-display').textContent = hours > 0 ? `~${hours}h` : '0h';
+}
+
+// Phase tabs
+document.getElementById('phase-nav').addEventListener('click', (e) => {
+  const tab = e.target.closest('.phase-tab');
+  if (!tab) return;
+  const phase = tab.dataset.phase;
+
+  document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.phase-content').forEach(c => c.classList.remove('active'));
+
+  tab.classList.add('active');
+  document.getElementById(`phase-${phase}`).classList.add('active');
+});
+
+// Init
+loadState();
+renderIssues();
+</script>
+</body>
+</html>
