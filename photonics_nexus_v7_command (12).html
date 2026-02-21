@@ -6107,12 +6107,13 @@
                     <button class="view-btn" data-view="trimetric" title="三测">TRI</button>
                 </div>
 
-                <div class="theme-selector">
-                    <button class="theme-btn active" data-theme="light" title="Light"></button>
-                    <button class="theme-btn" data-theme="dark" title="Dark"></button>
-                    <button class="theme-btn" data-theme="realistic" title="Lab"></button>
-                    <button class="theme-btn" data-theme="arctic" title="Arctic"></button>
-                    <button class="theme-btn" data-theme="sunset" title="Sunset"></button>
+                <!-- SPRINT 42: Added aria-label for accessibility -->
+                <div class="theme-selector" role="group" aria-label="Theme selector">
+                    <button class="theme-btn active" data-theme="light" title="Light" aria-label="Switch to Light theme"></button>
+                    <button class="theme-btn" data-theme="dark" title="Dark" aria-label="Switch to Dark theme"></button>
+                    <button class="theme-btn" data-theme="realistic" title="Lab" aria-label="Switch to Lab Realistic theme"></button>
+                    <button class="theme-btn" data-theme="arctic" title="Arctic" aria-label="Switch to Arctic theme"></button>
+                    <button class="theme-btn" data-theme="sunset" title="Sunset" aria-label="Switch to Sunset theme"></button>
                 </div>
             </div>
         </header>
@@ -6271,7 +6272,7 @@
                             <div class="name" id="selected-name">—</div>
                             <div class="type" id="selected-type">—</div>
                         </div>
-                        <button class="lock-btn" id="btn-lock" title="Lock/Unlock Position">
+                        <button class="lock-btn" id="btn-lock" title="Lock/Unlock Position" aria-label="Lock or unlock component position">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -6374,15 +6375,15 @@
                 
                 <!-- SPRINT 22.2: Fixed action buttons at bottom -->
                 <div class="action-buttons">
-                    <button class="action-btn swap" id="btn-replace-selected" title="Replace with another SKU">
+                    <button class="action-btn swap" id="btn-replace-selected" title="Replace with another SKU" aria-label="Replace component with another SKU">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
                         Replace SKU
                     </button>
-                    <button class="action-btn primary" id="btn-duplicate-selected">
+                    <button class="action-btn primary" id="btn-duplicate-selected" aria-label="Duplicate selected component">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                         Duplicate
                     </button>
-                    <button class="action-btn danger" id="btn-delete-selected">
+                    <button class="action-btn danger" id="btn-delete-selected" aria-label="Delete selected component">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                         Delete
                     </button>
@@ -6394,7 +6395,7 @@
                 <h3>📁 Project</h3>
                 
                 <!-- SPRINT 20: Table Settings Button -->
-                <button class="io-btn table-settings" id="btn-table-settings">
+                <button class="io-btn table-settings" id="btn-table-settings" aria-label="Table settings">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2"/>
                         <line x1="3" y1="9" x2="21" y2="9"/>
@@ -6676,7 +6677,7 @@
             <div class="pulse-animator-panel" id="pulse-animator-panel">
                 <div class="pulse-panel-header">
                     <span class="pulse-panel-title">⚡ Light Pulse Animator</span>
-                    <button class="pulse-panel-close" id="pulse-panel-close">×</button>
+                    <button class="pulse-panel-close" id="pulse-panel-close" aria-label="Close pulse analysis panel">×</button>
                 </div>
                 <div class="pulse-panel-body">
                     <div class="pulse-control-row">
@@ -6725,7 +6726,7 @@
                         ⚡ FROG Pulse Shape Analysis
                         <span class="badge">REAL-TIME</span>
                     </span>
-                    <button class="frog-panel-close" id="frog-panel-close">×</button>
+                    <button class="frog-panel-close" id="frog-panel-close" aria-label="Close FROG comparison panel">×</button>
                 </div>
                 <div class="frog-panel-body">
                     <!-- Results Summary Bar -->
@@ -7332,7 +7333,7 @@
                     <span class="category-icon" id="selector-category-icon">🔴</span>
                     <span id="selector-category-title">Select Product Model</span>
                 </div>
-                <button class="product-selector-close" id="selector-close-btn">
+                <button class="product-selector-close" id="selector-close-btn" aria-label="Close product selector">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
@@ -7353,7 +7354,7 @@
                     <div class="header-title" id="rec-modal-title">推荐替换产品</div>
                     <div class="header-subtitle" id="rec-modal-subtitle">以下产品与当前光束参数兼容</div>
                 </div>
-                <button class="close-btn" id="rec-modal-close">
+                <button class="close-btn" id="rec-modal-close" aria-label="Close recommendation modal">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
@@ -7379,7 +7380,7 @@
                 <span class="new-product" id="confirm-new-product">Broadband Mirror</span>
             </div>
             <div class="confirm-buttons">
-                <button class="btn-cancel" id="confirm-cancel">取消</button>
+                <button class="btn-cancel" id="confirm-cancel" aria-label="Cancel">取消</button>
                 <button class="btn-confirm" id="confirm-replace">✓ 确认替换</button>
             </div>
         </div>
@@ -11950,6 +11951,7 @@
 
         // ═══════════════════════════════════════════════════════════════════
         // SPRINT 37 FIX: CmdDelete with support structure and Group preservation
+        // SPRINT 42: Added userData snapshot for safe undo after save/load
         // ═══════════════════════════════════════════════════════════════════
         class CmdDelete extends Command {
             constructor(sceneManager, component) {
@@ -11960,13 +11962,30 @@
                 this.productId = component.userData.productId;
                 this.position = component.position.clone();
                 this.rotation = component.rotation.y;
-                
+
+                // SPRINT 42: Snapshot userData for resilient undo
+                // If the component reference becomes stale (after save/load),
+                // we can rebuild from this snapshot.
+                try {
+                    this.userDataSnapshot = JSON.parse(JSON.stringify({
+                        productId: component.userData.productId,
+                        label: component.userData.label,
+                        params: component.userData.params,
+                        locked: component.userData.locked,
+                        isPumped: component.userData.isPumped,
+                        isComponentGroup: component.userData.isComponentGroup,
+                        childCount: component.userData.childCount
+                    }));
+                } catch (e) {
+                    this.userDataSnapshot = null;
+                }
+
                 // SPRINT 37: Save support structure references (for non-groups)
                 this.postGroup = component.userData.postGroup || null;
                 this.riserGroup = component.userData.riserGroup || null;
                 this.postPosition = this.postGroup?.position.clone() || null;
                 this.riserPosition = this.riserGroup?.position.clone() || null;
-                
+
                 // SPRINT 37: Save group children info for proper restoration
                 if (this.isGroup) {
                     this.groupChildCount = component.userData.childCount || 0;
@@ -11978,13 +11997,37 @@
             }
 
             undo() {
+                // SPRINT 42: Check if component reference is still valid (not stale)
+                if (!this.component || !this.component.userData) {
+                    // Stale reference — attempt rebuild from snapshot
+                    if (this.userDataSnapshot && this.sceneManager.addComponent) {
+                        console.warn('⚠️ CmdDelete.undo: Stale reference, rebuilding from snapshot');
+                        try {
+                            const rebuilt = this.sceneManager.addComponent(
+                                this.userDataSnapshot.productId,
+                                this.position.x,
+                                this.position.z
+                            );
+                            if (rebuilt) {
+                                rebuilt.rotation.y = this.rotation;
+                                Object.assign(rebuilt.userData.params || {}, this.userDataSnapshot.params || {});
+                            }
+                        } catch (e) {
+                            console.error('❌ CmdDelete.undo rebuild failed:', e);
+                        }
+                    } else {
+                        console.error('❌ CmdDelete.undo: Cannot restore — no snapshot available');
+                    }
+                    return;
+                }
+
                 this.component.position.copy(this.position);
                 this.component.rotation.y = this.rotation;
-                
+
                 // SPRINT 37: Restore support structure references
                 this.component.userData.postGroup = this.postGroup;
                 this.component.userData.riserGroup = this.riserGroup;
-                
+
                 // Restore support positions
                 if (this.postGroup && this.postPosition) {
                     this.postGroup.position.copy(this.postPosition);
@@ -11992,7 +12035,7 @@
                 if (this.riserGroup && this.riserPosition) {
                     this.riserGroup.position.copy(this.riserPosition);
                 }
-                
+
                 this.sceneManager._addToScene(this.component);
             }
 
@@ -22733,9 +22776,16 @@
             // SPRINT 15: Added physicsPayload for pulse width and GDD accumulation
             // SPRINT 21.4 FIX: Ensure payload has power property for PhysicsEngine
             // ═══════════════════════════════════════════════════════════════
-            traceRay(origin, direction, color, components, power = 1.0, depth = 0, beamDiameter = 3.0, physicsPayload = null) {
+            traceRay(origin, direction, color, components, power = 1.0, depth = 0, beamDiameter = 3.0, physicsPayload = null, _traceStartTime = null) {
                 const segments = [];
-                
+
+                // SPRINT 42: Time-based timeout to prevent UI freeze on recursive beam splitters
+                const startTime = _traceStartTime || performance.now();
+                if (performance.now() - startTime > 50) {
+                    console.warn('⚠️ BeamSystem: Ray trace timeout (50ms) — possible recursive splitter loop');
+                    return segments;
+                }
+
                 // Stop if power too low or too deep
                 if (power < this.minPowerThreshold || depth > this.maxReflections) {
                     return segments;
@@ -22772,7 +22822,17 @@
                         // Run validators when beam hits a component
                         // ═══════════════════════════════════════════════════════════
                         const productData = PRODUCT_SCHEMA[hit.component.userData.productId];
-                        
+
+                        // SPRINT 42: Type chain validation — warn on invalid component ordering
+                        if (productData && productData.type === 'SOURCE') {
+                            // Beam from one SOURCE hitting another SOURCE — invalid chain
+                            if (!hit.component.userData._validationToastShown) {
+                                console.warn(`⚠️ Type chain: beam from source hitting SOURCE "${productData.shortName || productData.name}"`);
+                                this.sceneManager?.showToast?.(`⚠️ SOURCE→SOURCE: ${productData.shortName || productData.name} should not receive beam input`, 'warning');
+                                hit.component.userData._validationToastShown = true;
+                            }
+                        }
+
                         // SPRINT 22.1: Track if beam should be blocked due to validation failure
                         let blockBeam = false;
                         
@@ -22936,7 +22996,8 @@
                                 transmitPower,  // Uses variable splitRatio
                                 depth + 1,
                                 currentBeamDiameter,  // Pass beam diameter
-                                { ...currentPayload, power: transmitPower } // SPRINT 21.4.3: Include correct power
+                                { ...currentPayload, power: transmitPower }, // SPRINT 21.4.3: Include correct power
+                                startTime  // SPRINT 42: Propagate timeout clock
                             );
                             segments.push(...transmitSegments);
                             
@@ -22965,7 +23026,8 @@
                                 reflectPower,  // Uses variable splitRatio
                                 depth + 1,
                                 currentBeamDiameter,  // Pass beam diameter
-                                { ...currentPayload, power: reflectPower } // SPRINT 21.4.3: Include correct power
+                                { ...currentPayload, power: reflectPower }, // SPRINT 21.4.3: Include correct power
+                                startTime  // SPRINT 42: Propagate timeout clock
                             );
                             segments.push(...reflectSegments);
                             
@@ -24166,7 +24228,9 @@
                 this.fitCameraToTable();
                 
                 this.animate();
-                window.addEventListener('resize', () => this.onResize());
+                // SPRINT 42: Store resize handler reference for cleanup
+                this._onResize = () => this.onResize();
+                window.addEventListener('resize', this._onResize);
             }
 
             setupCamera() {
@@ -24489,8 +24553,9 @@
                 
                 // ═══════════════════════════════════════════════════════════
                 // POINTER DOWN - Start drag
+                // SPRINT 42: Store handler reference for cleanup
                 // ═══════════════════════════════════════════════════════════
-                this.renderer.domElement.addEventListener('pointerdown', (event) => {
+                this._onPointerDown = (event) => {
                     if (event.button !== 0) return;
                     
                     // SPRINT 8: Skip if measurement mode is active
@@ -24685,13 +24750,15 @@
                         this.deselectObject();
                         this.startBoxSelection(event);
                     }
-                });
-                
+                };
+                this.renderer.domElement.addEventListener('pointerdown', this._onPointerDown);
+
                 // ═══════════════════════════════════════════════════════════
                 // POINTER MOVE - Drag or Box Selection
                 // SPRINT 16 HOTFIX: Throttled with RAF to prevent infinite loop
+                // SPRINT 42: Store handler reference for cleanup
                 // ═══════════════════════════════════════════════════════════
-                this.renderer.domElement.addEventListener('pointermove', (event) => {
+                this._onPointerMove = (event) => {
                     this.updateMousePosition(event);
                     
                     // SPRINT 13: Annotation drag handling
@@ -24728,8 +24795,9 @@
                         const target = this.findBestClickTarget();
                         cursorManager.setHoverState(target !== null);
                     }
-                });
-                
+                };
+                this.renderer.domElement.addEventListener('pointermove', this._onPointerMove);
+
                 // ═══════════════════════════════════════════════════════════
                 // SPRINT 16 HOTFIX: Separated drag processing function
                 // SPRINT 35: Enhanced with smooth interpolation and grid snap
@@ -24952,8 +25020,9 @@
                 // POINTER UP - End drag or Box Selection
                 // SPRINT 16 HOTFIX: Full physics recalculation on drop
                 // SPRINT 37.8: Proper history recording for multi-drag & groups
+                // SPRINT 42: Store handler reference for cleanup
                 // ═══════════════════════════════════════════════════════════
-                this.renderer.domElement.addEventListener('pointerup', (event) => {
+                this._onPointerUp = (event) => {
                     if (event.button !== 0) return;
                     
                     // SPRINT 13: Annotation release handling
@@ -25139,50 +25208,55 @@
                     // Always reset on pointerup
                     this._deferPhysics = false;  // Ensure physics is re-enabled
                     this.finishDrag();
-                });
-                
-                // Safety resets
-                this.renderer.domElement.addEventListener('pointerleave', () => {
+                };
+                this.renderer.domElement.addEventListener('pointerup', this._onPointerUp);
+
+                // Safety resets — SPRINT 42: Store handler references
+                this._onPointerLeave = () => {
                     if (this.isDirectDragging) {
                         console.log('⚠️ Pointer left canvas, finishing drag');
                         this.finishDrag();
                     }
-                });
-                
-                this.renderer.domElement.addEventListener('pointercancel', () => {
+                };
+                this.renderer.domElement.addEventListener('pointerleave', this._onPointerLeave);
+
+                this._onPointerCancel = () => {
                     console.log('⚠️ Pointer cancelled');
                     this.resetDragState();
-                });
+                };
+                this.renderer.domElement.addEventListener('pointercancel', this._onPointerCancel);
                 
                 // ═══════════════════════════════════════════════════════════════
                 // DOUBLE-CLICK: Always open Quick Panel for ALL components
                 // Rotation for reflect/split is now a ⟳ button inside the panel
                 // ═══════════════════════════════════════════════════════════════
-                this.renderer.domElement.addEventListener('dblclick', (event) => {
+                // SPRINT 42: Store dblclick handler reference for cleanup
+                this._onDblClick = (event) => {
                     // Skip if any tool is active
                     if (typeof measurementTool !== 'undefined' && measurementTool?.isActive) return;
                     if (typeof opticalPathTool !== 'undefined' && opticalPathTool?.isActive) return;
                     if (typeof annotationManager !== 'undefined' && annotationManager?.isActive) return;
                     if (typeof formatPainter !== 'undefined' && formatPainter?.isActive) return;
-                    
+
                     this.updateMousePosition(event);
                     this.raycaster.setFromCamera(this.mouse, this.camera);
-                    
+
                     const target = this.findBestClickTarget();
                     if (!target) return;
-                    
+
                     // Check if locked
                     if (target.userData.locked) {
                         this.showToast('🔒 Component is locked');
                         return;
                     }
-                    
+
                     // Open Quick Panel for any component (including mirrors)
                     if (window.quickPanel && !target.userData.isComponentGroup) {
                         window.quickPanel.openFor(target, event);
                         console.log('📋 Double-click: Opened Quick Panel');
                     }
-                });
+                };
+                this.renderer.domElement.addEventListener('dblclick', this._onDblClick);
             }
             
             // Find the component whose CENTER is closest to click point
@@ -29059,7 +29133,23 @@
                 
                 try {
                     this.beamSystem.clear();
-                    
+
+                    // SPRINT 42: Reset validation toast flags at start of each beam trace
+                    // Ensures toasts re-fire if issues recur after user corrections
+                    this.scene.children.forEach(entity => {
+                        if (entity.userData?._validationToastShown) {
+                            entity.userData._validationToastShown = false;
+                        }
+                        // Also reset for children in groups
+                        if (entity.children) {
+                            entity.children.forEach(child => {
+                                if (child.userData?._validationToastShown) {
+                                    child.userData._validationToastShown = false;
+                                }
+                            });
+                        }
+                    });
+
                     // ═══════════════════════════════════════════════════════
                     // SPRINT 28: FORCE UPDATE ALL WORLD MATRICES
                     // Critical for grouped objects to have correct positions
@@ -30797,7 +30887,27 @@
                 this.renderer.setSize(width, height);
                 this.composer.setSize(width, height);
             }
-            
+
+            // ═══════════════════════════════════════════════════════════════════
+            // SPRINT 42: Event listener cleanup — prevents memory leaks on re-init
+            // Call before re-instantiating SceneManager or on app teardown.
+            // ═══════════════════════════════════════════════════════════════════
+            disposeEventListeners() {
+                const dom = this.renderer?.domElement;
+                if (dom) {
+                    if (this._onPointerDown)   dom.removeEventListener('pointerdown', this._onPointerDown);
+                    if (this._onPointerMove)   dom.removeEventListener('pointermove', this._onPointerMove);
+                    if (this._onPointerUp)     dom.removeEventListener('pointerup', this._onPointerUp);
+                    if (this._onPointerLeave)  dom.removeEventListener('pointerleave', this._onPointerLeave);
+                    if (this._onPointerCancel) dom.removeEventListener('pointercancel', this._onPointerCancel);
+                    if (this._onDblClick)      dom.removeEventListener('dblclick', this._onDblClick);
+                }
+                if (this._onResize) {
+                    window.removeEventListener('resize', this._onResize);
+                }
+                console.log('🧹 SceneManager: All event listeners removed');
+            }
+
             // ═══════════════════════════════════════════════════════════════════
             // SPRINT 21.3: DEBUG - Visualize Converter Ports (Updated)
             // Call this from console: sceneManager.debugConverterPorts()
@@ -34075,6 +34185,16 @@
             console.log('');
             console.log('🔧 DEBUG: Run testPulseFlow() in console to test pulse measurement');
             console.log('');
+
+            // ═══════════════════════════════════════════════════════════
+            // SPRINT 42: Bulk aria-label from data-tooltip for accessibility
+            // Copies data-tooltip attribute to aria-label on all buttons
+            // that don't already have an explicit aria-label set.
+            // ═══════════════════════════════════════════════════════════
+            document.querySelectorAll('button[data-tooltip]:not([aria-label])').forEach(btn => {
+                btn.setAttribute('aria-label', btn.dataset.tooltip);
+            });
+            console.log('♿ SPRINT 42: aria-labels applied to toolbar buttons');
         }
 
         window.addEventListener('DOMContentLoaded', init);
